@@ -1,0 +1,2050 @@
+<html>
+<head>
+		<title>Automation Wizard</title>
+		<style>
+body {font-family: Arial, Helvetica, sans-serif;}
+
+/* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+}
+
+/* The Close Button */
+.close {
+  color: #aaaaaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+<script src="frames2.js"></script>
+<table>
+    <tr>
+        <td>Filename to Save As:</td>
+        <td><input id="inputFileNameToSaveAs"></input></td>
+        <td><button onclick="saveTextAsFile()">Save Text to File</button></td>
+    </tr>
+</table>
+
+<script language="JavaScript" type="text/javascript">
+<!--
+//to work out:
+//how do continuations for modal dialog, keeping track of status
+//how to the actual cloning, also while keeping track
+//approach: askQuestions always starts at the top of frame, and dispatches an interaction,
+//eg a dialog box. When the interaction terminates it imvokes askQuestions again
+// if askQuestions ever terminates, it calls generateCommands
+
+
+//need to add resolution check
+//askQuestions keeps going as long as any questions were asked
+//each part has to return an indicator when it asked a question
+
+
+function askQuestions(frameName,isTopLevel)
+{
+	//console.log("{"+frameName+"}");
+	console.log("start asking questions for "+frameName);
+	//alert("start asking questions for "+frameName);
+	var finished=true;
+	var frame=frames.get(frameName);
+	if(!isFinished(frame))
+	{
+
+		if(frame.type=="compositeFrame")
+			finished=processCompositeFrame(frame);
+		else if (frame.type=="alternativesFrame")
+			finished=processAlternativesFrame(frame)
+		else if (frame.type=="leaf")
+		{
+			processLeaf(frame);
+			finished=true;
+		}
+	}
+
+	console.log(frameName, " finished? ",finished);
+	if(finished)
+	{
+		console.log(frameName," is finished; isTopLevel ",isTopLevel)
+		if(isTopLevel)
+			document.getElementById("output").innerHTML+=generateCommands(frameName);
+		else
+		{
+			frame.finished=true;
+			setTimeout(function(){ askQuestions("top",true); }, 10);
+
+		}
+	}
+}
+function isFinished(frame)
+{
+	if(frame.type=="leaf")
+		return true;
+	return frame.finished;
+}
+function processLeaf(frame)
+{
+	console.log("processing leaf ",frame.name);
+}
+function processAlternativesFrame(frame)
+{
+	console.log("processing alternative ",frame.name);
+	if (frame.choice!="")
+	{
+		//if(!frame.finished)
+		if(!isFinished(frames.get(frame.choice)))
+		{
+			askQuestions(frame.choice,false);
+			return false;
+		}
+		frame.finished=true;
+		return true;
+	}
+	else
+	{
+		return processAlternatives(frame);
+	}
+}
+function processCompositeFrame(frame)
+{
+	console.log("composite frame ",frame.name);
+	var finished=true;
+	for(var i=0;i<frame.parts.length;i++)
+	{
+		var partType=frame.parts[i].type;
+		if(partType=="simpleSlot")
+		{
+			if(frame.parts[0].value!=null){
+			routine_name = 	`<TaskerData sr="" dvi="1" tv="5.9.2">
+			<Profile sr="prof2" ve="2">
+			<cdate>1592290752621</cdate>
+			<edate>1595925337825</edate>
+			<flags>8</flags>
+			<id>2</id>
+			<mid0>3</mid0>
+			<nme>Alexa Routine</nme>
+			<App sr="con0" ve="2">
+			<cls0>com.amazon.dee.app.Launcher</cls0>
+			<flags>2</flags>
+			<label0>Amazon Alexa</label0>
+			<pkg0>com.amazon.dee.app</pkg0>
+			</App>
+			</Profile>
+			<Task sr="task3">
+			<cdate>1592290764775</cdate>
+			<edate>1595925337825</edate>
+			<id>3</id>
+			<nme>Set Routine</nme>
+			<pri>100</pri>
+			<Action sr="act0" ve="7">
+			<code>20</code>
+			<App sr="arg0">
+			<appClass>com.amazon.dee.app.Launcher</appClass>
+			<appPkg>com.amazon.dee.app</appPkg>
+			<label>Amazon Alexa</label>
+			</App>
+			<Str sr="arg1" ve="3"/>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="1"/>
+			</Action>
+			<Action sr="act1" ve="7">
+			<code>30</code>
+			<Int sr="arg0" val="0"/>
+			<Int sr="arg1" val="10"/>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			</Action>
+			<Action sr="act10" ve="7">
+			<code>105</code>
+			<Str sr="arg0" ve="3">`+frame.parts[0].value.trim()+`</Str>
+			<Int sr="arg1" val="0"/>
+			</Action>
+			<Action sr="act11" ve="7">
+			<code>30</code>
+			<Int sr="arg0" val="0"/>
+			<Int sr="arg1" val="3"/>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			</Action>
+			<Action sr="act12" ve="7">
+			<code>1732635924</code>
+			<Bundle sr="arg0">
+			<Vals sr="val">
+			<ActionId>please enter a routine name</ActionId>
+			<ActionId-type>java.lang.String</ActionId-type>
+			<ActionType>32768</ActionType>
+			<ActionType-type>java.lang.String</ActionType-type>
+			<EnableDisableAccessibilityService>&lt;null&gt;</EnableDisableAccessibilityService>
+			<EnableDisableAccessibilityService-type>java.lang.String</EnableDisableAccessibilityService-type>
+			<FieldSelectionType>0</FieldSelectionType>
+			<FieldSelectionType-type>java.lang.String</FieldSelectionType-type>
+			<IsFirstAction>false</IsFirstAction>
+			<IsFirstAction-type>java.lang.Boolean</IsFirstAction-type>
+			<IsTaskerAction>false</IsTaskerAction>
+			<IsTaskerAction-type>java.lang.Boolean</IsTaskerAction-type>
+			<NearbyText>&lt;null&gt;</NearbyText>
+			<NearbyText-type>java.lang.String</NearbyText-type>
+			<Password>&lt;null&gt;</Password>
+			<Password-type>java.lang.String</Password-type>
+			<RepeatInterval>&lt;null&gt;</RepeatInterval>
+			<RepeatInterval-type>java.lang.String</RepeatInterval-type>
+			<RepeatTimes>&lt;null&gt;</RepeatTimes>
+			<RepeatTimes-type>java.lang.String</RepeatTimes-type>
+			<StoredAction>&lt;null&gt;</StoredAction>
+			<StoredAction-type>java.lang.String</StoredAction-type>
+			<TextToWrite>&lt;null&gt;</TextToWrite>
+			<TextToWrite-type>java.lang.String</TextToWrite-type>
+			<com.twofortyfouram.locale.intent.extra.BLURB>Type: Text
+			Value: please enter a routine name
+			Action : Paste</com.twofortyfouram.locale.intent.extra.BLURB>
+			<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES>&lt;StringArray sr=""&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;%err
+			Error Code
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;%errmsg
+			Error Message
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;&lt;/StringArray&gt;</net.dinglisch.android.tasker.RELEVANT_VARIABLES>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>[Ljava.lang.String;</net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>ActionId FieldSelectionType ActionType plugininstanceid plugintypeid </net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+			<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+			<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+			<plugininstanceid>597eebe6-d2bf-499a-a1a5-0cfbe2fab8b8</plugininstanceid>
+			<plugininstanceid-type>java.lang.String</plugininstanceid-type>
+			<plugintypeid>com.joaomgcd.autoinput.intent.IntentPerformAction</plugintypeid>
+			<plugintypeid-type>java.lang.String</plugintypeid-type>
+			</Vals>
+			</Bundle>
+			<Str sr="arg1" ve="3">com.joaomgcd.autoinput</Str>
+			<Str sr="arg2" ve="3">com.joaomgcd.autoinput.activity.ActivityConfigPerformAction</Str>
+			<Int sr="arg3" val="23"/>
+			</Action>
+			<Action sr="act13" ve="7">
+			<code>30</code>
+			<Int sr="arg0" val="0"/>
+			<Int sr="arg1" val="3"/>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			</Action>
+			<Action sr="act14" ve="7">
+			<code>1732635924</code>
+			<Bundle sr="arg0">
+			<Vals sr="val">
+			<ActionId>Next</ActionId>
+			<ActionId-type>java.lang.String</ActionId-type>
+			<ActionType>16</ActionType>
+			<ActionType-type>java.lang.String</ActionType-type>
+			<EnableDisableAccessibilityService>&lt;null&gt;</EnableDisableAccessibilityService>
+			<EnableDisableAccessibilityService-type>java.lang.String</EnableDisableAccessibilityService-type>
+			<FieldSelectionType>0</FieldSelectionType>
+			<FieldSelectionType-type>java.lang.String</FieldSelectionType-type>
+			<IsFirstAction>false</IsFirstAction>
+			<IsFirstAction-type>java.lang.Boolean</IsFirstAction-type>
+			<IsTaskerAction>false</IsTaskerAction>
+			<IsTaskerAction-type>java.lang.Boolean</IsTaskerAction-type>
+			<NearbyText>&lt;null&gt;</NearbyText>
+			<NearbyText-type>java.lang.String</NearbyText-type>
+			<Password>&lt;null&gt;</Password>
+			<Password-type>java.lang.String</Password-type>
+			<RepeatInterval>&lt;null&gt;</RepeatInterval>
+			<RepeatInterval-type>java.lang.String</RepeatInterval-type>
+			<RepeatTimes>&lt;null&gt;</RepeatTimes>
+			<RepeatTimes-type>java.lang.String</RepeatTimes-type>
+			<StoredAction>&lt;null&gt;</StoredAction>
+			<StoredAction-type>java.lang.String</StoredAction-type>
+			<TextToWrite>&lt;null&gt;</TextToWrite>
+			<TextToWrite-type>java.lang.String</TextToWrite-type>
+			<com.twofortyfouram.locale.intent.extra.BLURB>Type: Text
+			Value: Next
+			Action : Click</com.twofortyfouram.locale.intent.extra.BLURB>
+			<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES>&lt;StringArray sr=""&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;%err
+			Error Code
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;%errmsg
+			Error Message
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;&lt;/StringArray&gt;</net.dinglisch.android.tasker.RELEVANT_VARIABLES>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>[Ljava.lang.String;</net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>ActionId FieldSelectionType ActionType plugininstanceid plugintypeid </net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+			<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+			<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+			<plugininstanceid>b17e91a4-bd5f-4245-bb7b-be88fd3ba071</plugininstanceid>
+			<plugininstanceid-type>java.lang.String</plugininstanceid-type>
+			<plugintypeid>com.joaomgcd.autoinput.intent.IntentPerformAction</plugintypeid>
+			<plugintypeid-type>java.lang.String</plugintypeid-type>
+			</Vals>
+			</Bundle>
+			<Str sr="arg1" ve="3">com.joaomgcd.autoinput</Str>
+			<Str sr="arg2" ve="3">com.joaomgcd.autoinput.activity.ActivityConfigPerformAction</Str>
+			<Int sr="arg3" val="23"/>
+			</Action>
+			<Action sr="act15" ve="7">
+			<code>30</code>
+			<Int sr="arg0" val="0"/>
+			<Int sr="arg1" val="3"/>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			</Action>\n`
+			}
+			if(frame.parts[1].value!=null){
+
+			hour_val=`<Action sr="act16" ve="7">
+			<code>1732635924</code>
+			<Bundle sr="arg0">
+			<Vals sr="val">
+			<ActionId>When this happens ex. you say "Alexa, good morning"</ActionId>
+			<ActionId-type>java.lang.String</ActionId-type>
+			<ActionType>16</ActionType>
+			<ActionType-type>java.lang.String</ActionType-type>
+			<EnableDisableAccessibilityService>&lt;null&gt;</EnableDisableAccessibilityService>
+			<EnableDisableAccessibilityService-type>java.lang.String</EnableDisableAccessibilityService-type>
+			<FieldSelectionType>0</FieldSelectionType>
+			<FieldSelectionType-type>java.lang.String</FieldSelectionType-type>
+			<IsFirstAction>false</IsFirstAction>
+			<IsFirstAction-type>java.lang.Boolean</IsFirstAction-type>
+			<IsTaskerAction>false</IsTaskerAction>
+			<IsTaskerAction-type>java.lang.Boolean</IsTaskerAction-type>
+			<NearbyText>&lt;null&gt;</NearbyText>
+			<NearbyText-type>java.lang.String</NearbyText-type>
+			<Password>&lt;null&gt;</Password>
+			<Password-type>java.lang.String</Password-type>
+			<RepeatInterval>&lt;null&gt;</RepeatInterval>
+			<RepeatInterval-type>java.lang.String</RepeatInterval-type>
+			<RepeatTimes>&lt;null&gt;</RepeatTimes>
+			<RepeatTimes-type>java.lang.String</RepeatTimes-type>
+			<StoredAction>&lt;null&gt;</StoredAction>
+			<StoredAction-type>java.lang.String</StoredAction-type>
+			<TextToWrite>&lt;null&gt;</TextToWrite>
+			<TextToWrite-type>java.lang.String</TextToWrite-type>
+			<com.twofortyfouram.locale.intent.extra.BLURB>Type: Text
+			Value: When this happens ex. you say "Alexa, good morning"
+			Action : Click</com.twofortyfouram.locale.intent.extra.BLURB>
+			<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES>&lt;StringArray sr=""&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;%err
+			Error Code
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;%errmsg
+			Error Message
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;&lt;/StringArray&gt;</net.dinglisch.android.tasker.RELEVANT_VARIABLES>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>[Ljava.lang.String;</net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>ActionId FieldSelectionType ActionType plugininstanceid plugintypeid </net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+			<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+			<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+			<plugininstanceid>c7b275a3-4a7a-4262-879a-33083689b9fb</plugininstanceid>
+			<plugininstanceid-type>java.lang.String</plugininstanceid-type>
+			<plugintypeid>com.joaomgcd.autoinput.intent.IntentPerformAction</plugintypeid>
+			<plugintypeid-type>java.lang.String</plugintypeid-type>
+			</Vals>
+			</Bundle>
+			<Str sr="arg1" ve="3">com.joaomgcd.autoinput</Str>
+			<Str sr="arg2" ve="3">com.joaomgcd.autoinput.activity.ActivityConfigPerformAction</Str>
+			<Int sr="arg3" val="23"/>
+			</Action>
+			<Action sr="act17" ve="7">
+			<code>30</code>
+			<Int sr="arg0" val="0"/>
+			<Int sr="arg1" val="3"/>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			</Action>
+			<Action sr="act18" ve="7">
+			<code>1732635924</code>
+			<Bundle sr="arg0">
+			<Vals sr="val">
+			<ActionId>Schedule</ActionId>
+			<ActionId-type>java.lang.String</ActionId-type>
+			<ActionType>16</ActionType>
+			<ActionType-type>java.lang.String</ActionType-type>
+			<EnableDisableAccessibilityService>&lt;null&gt;</EnableDisableAccessibilityService>
+			<EnableDisableAccessibilityService-type>java.lang.String</EnableDisableAccessibilityService-type>
+			<FieldSelectionType>0</FieldSelectionType>
+			<FieldSelectionType-type>java.lang.String</FieldSelectionType-type>
+			<IsFirstAction>false</IsFirstAction>
+			<IsFirstAction-type>java.lang.Boolean</IsFirstAction-type>
+			<IsTaskerAction>false</IsTaskerAction>
+			<IsTaskerAction-type>java.lang.Boolean</IsTaskerAction-type>
+			<NearbyText>&lt;null&gt;</NearbyText>
+			<NearbyText-type>java.lang.String</NearbyText-type>
+			<Password>&lt;null&gt;</Password>
+			<Password-type>java.lang.String</Password-type>
+			<RepeatInterval>&lt;null&gt;</RepeatInterval>
+			<RepeatInterval-type>java.lang.String</RepeatInterval-type>
+			<RepeatTimes>&lt;null&gt;</RepeatTimes>
+			<RepeatTimes-type>java.lang.String</RepeatTimes-type>
+			<StoredAction>&lt;null&gt;</StoredAction>
+			<StoredAction-type>java.lang.String</StoredAction-type>
+			<TextToWrite>&lt;null&gt;</TextToWrite>
+			<TextToWrite-type>java.lang.String</TextToWrite-type>
+			<com.twofortyfouram.locale.intent.extra.BLURB>Type: Text
+			Value: Schedule
+			Action : Click</com.twofortyfouram.locale.intent.extra.BLURB>
+			<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES>&lt;StringArray sr=""&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;%err
+			Error Code
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;%errmsg
+			Error Message
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;&lt;/StringArray&gt;</net.dinglisch.android.tasker.RELEVANT_VARIABLES>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>[Ljava.lang.String;</net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>ActionId FieldSelectionType ActionType plugininstanceid plugintypeid </net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+			<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+			<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+			<plugininstanceid>05ca5408-1a58-44ee-b0f4-88d7b2297af4</plugininstanceid>
+			<plugininstanceid-type>java.lang.String</plugininstanceid-type>
+			<plugintypeid>com.joaomgcd.autoinput.intent.IntentPerformAction</plugintypeid>
+			<plugintypeid-type>java.lang.String</plugintypeid-type>
+			</Vals>
+			</Bundle>
+			<Str sr="arg1" ve="3">com.joaomgcd.autoinput</Str>
+			<Str sr="arg2" ve="3">com.joaomgcd.autoinput.activity.ActivityConfigPerformAction</Str>
+			<Int sr="arg3" val="23"/>
+			</Action>
+			<Action sr="act19" ve="7">
+			<code>30</code>
+			<Int sr="arg0" val="0"/>
+			<Int sr="arg1" val="3"/>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			</Action>
+			<Action sr="act2" ve="7">
+			<code>1732635924</code>
+			<Bundle sr="arg0">
+			<Vals sr="val">
+			<ActionId>com.amazon.dee.app:id/tab_more</ActionId>
+			<ActionId-type>java.lang.String</ActionId-type>
+			<ActionType>16</ActionType>
+			<ActionType-type>java.lang.String</ActionType-type>
+			<EnableDisableAccessibilityService>&lt;null&gt;</EnableDisableAccessibilityService>
+			<EnableDisableAccessibilityService-type>java.lang.String</EnableDisableAccessibilityService-type>
+			<FieldSelectionType>1</FieldSelectionType>
+			<FieldSelectionType-type>java.lang.String</FieldSelectionType-type>
+			<IsFirstAction>false</IsFirstAction>
+			<IsFirstAction-type>java.lang.Boolean</IsFirstAction-type>
+			<IsTaskerAction>false</IsTaskerAction>
+			<IsTaskerAction-type>java.lang.Boolean</IsTaskerAction-type>
+			<NearbyText>&lt;null&gt;</NearbyText>
+			<NearbyText-type>java.lang.String</NearbyText-type>
+			<Password>&lt;null&gt;</Password>
+			<Password-type>java.lang.String</Password-type>
+			<RepeatInterval>&lt;null&gt;</RepeatInterval>
+			<RepeatInterval-type>java.lang.String</RepeatInterval-type>
+			<RepeatTimes>&lt;null&gt;</RepeatTimes>
+			<RepeatTimes-type>java.lang.String</RepeatTimes-type>
+			<StoredAction>&lt;null&gt;</StoredAction>
+			<StoredAction-type>java.lang.String</StoredAction-type>
+			<TextToWrite>&lt;null&gt;</TextToWrite>
+			<TextToWrite-type>java.lang.String</TextToWrite-type>
+			<com.twofortyfouram.locale.intent.extra.BLURB>Type: Id
+			Value: com.amazon.dee.app:id/tab_more
+			Action : Click</com.twofortyfouram.locale.intent.extra.BLURB>
+			<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES>&lt;StringArray sr=""&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;%err
+			Error Code
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;%errmsg
+			Error Message
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;&lt;/StringArray&gt;</net.dinglisch.android.tasker.RELEVANT_VARIABLES>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>[Ljava.lang.String;</net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>ActionId FieldSelectionType ActionType plugininstanceid plugintypeid </net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+			<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+			<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+			<plugininstanceid>f4aabac2-cd16-4158-be8b-3d3708dd52de</plugininstanceid>
+			<plugininstanceid-type>java.lang.String</plugininstanceid-type>
+			<plugintypeid>com.joaomgcd.autoinput.intent.IntentPerformAction</plugintypeid>
+			<plugintypeid-type>java.lang.String</plugintypeid-type>
+			</Vals>
+			</Bundle>
+			<Str sr="arg1" ve="3">com.joaomgcd.autoinput</Str>
+			<Str sr="arg2" ve="3">com.joaomgcd.autoinput.activity.ActivityConfigPerformAction</Str>
+			<Int sr="arg3" val="23"/>
+			</Action>
+			<Action sr="act20" ve="7">
+			<code>1732635924</code>
+			<Bundle sr="arg0">
+			<Vals sr="val">
+			<ActionId>At Time</ActionId>
+			<ActionId-type>java.lang.String</ActionId-type>
+			<ActionType>16</ActionType>
+			<ActionType-type>java.lang.String</ActionType-type>
+			<EnableDisableAccessibilityService>&lt;null&gt;</EnableDisableAccessibilityService>
+			<EnableDisableAccessibilityService-type>java.lang.String</EnableDisableAccessibilityService-type>
+			<FieldSelectionType>0</FieldSelectionType>
+			<FieldSelectionType-type>java.lang.String</FieldSelectionType-type>
+			<IsFirstAction>false</IsFirstAction>
+			<IsFirstAction-type>java.lang.Boolean</IsFirstAction-type>
+			<IsTaskerAction>false</IsTaskerAction>
+			<IsTaskerAction-type>java.lang.Boolean</IsTaskerAction-type>
+			<NearbyText>&lt;null&gt;</NearbyText>
+			<NearbyText-type>java.lang.String</NearbyText-type>
+			<Password>&lt;null&gt;</Password>
+			<Password-type>java.lang.String</Password-type>
+			<RepeatInterval>&lt;null&gt;</RepeatInterval>
+			<RepeatInterval-type>java.lang.String</RepeatInterval-type>
+			<RepeatTimes>&lt;null&gt;</RepeatTimes>
+			<RepeatTimes-type>java.lang.String</RepeatTimes-type>
+			<StoredAction>&lt;null&gt;</StoredAction>
+			<StoredAction-type>java.lang.String</StoredAction-type>
+			<TextToWrite>&lt;null&gt;</TextToWrite>
+			<TextToWrite-type>java.lang.String</TextToWrite-type>
+			<com.twofortyfouram.locale.intent.extra.BLURB>Type: Text
+			Value: At Time
+			Action : Click</com.twofortyfouram.locale.intent.extra.BLURB>
+			<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES>&lt;StringArray sr=""&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;%err
+			Error Code
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;%errmsg
+			Error Message
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;&lt;/StringArray&gt;</net.dinglisch.android.tasker.RELEVANT_VARIABLES>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>[Ljava.lang.String;</net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>ActionId FieldSelectionType ActionType plugininstanceid plugintypeid </net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+			<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+			<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+			<plugininstanceid>517ec691-12ad-46a8-ae62-5fe59e472c46</plugininstanceid>
+			<plugininstanceid-type>java.lang.String</plugininstanceid-type>
+			<plugintypeid>com.joaomgcd.autoinput.intent.IntentPerformAction</plugintypeid>
+			<plugintypeid-type>java.lang.String</plugintypeid-type>
+			</Vals>
+			</Bundle>
+			<Str sr="arg1" ve="3">com.joaomgcd.autoinput</Str>
+			<Str sr="arg2" ve="3">com.joaomgcd.autoinput.activity.ActivityConfigPerformAction</Str>
+			<Int sr="arg3" val="23"/>
+			</Action>
+			<Action sr="act21" ve="7">
+			<code>30</code>
+			<Int sr="arg0" val="0"/>
+			<Int sr="arg1" val="3"/>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			</Action>
+			<Action sr="act22" ve="7">
+			<code>1732635924</code>
+			<Bundle sr="arg0">
+			<Vals sr="val">
+			<ActionId>At Time, Tap to set Time.</ActionId>
+			<ActionId-type>java.lang.String</ActionId-type>
+			<ActionType>16</ActionType>
+			<ActionType-type>java.lang.String</ActionType-type>
+			<EnableDisableAccessibilityService>&lt;null&gt;</EnableDisableAccessibilityService>
+			<EnableDisableAccessibilityService-type>java.lang.String</EnableDisableAccessibilityService-type>
+			<FieldSelectionType>0</FieldSelectionType>
+			<FieldSelectionType-type>java.lang.String</FieldSelectionType-type>
+			<IsFirstAction>false</IsFirstAction>
+			<IsFirstAction-type>java.lang.Boolean</IsFirstAction-type>
+			<IsTaskerAction>false</IsTaskerAction>
+			<IsTaskerAction-type>java.lang.Boolean</IsTaskerAction-type>
+			<NearbyText>&lt;null&gt;</NearbyText>
+			<NearbyText-type>java.lang.String</NearbyText-type>
+			<Password>&lt;null&gt;</Password>
+			<Password-type>java.lang.String</Password-type>
+			<RepeatInterval>&lt;null&gt;</RepeatInterval>
+			<RepeatInterval-type>java.lang.String</RepeatInterval-type>
+			<RepeatTimes>&lt;null&gt;</RepeatTimes>
+			<RepeatTimes-type>java.lang.String</RepeatTimes-type>
+			<StoredAction>&lt;null&gt;</StoredAction>
+			<StoredAction-type>java.lang.String</StoredAction-type>
+			<TextToWrite>&lt;null&gt;</TextToWrite>
+			<TextToWrite-type>java.lang.String</TextToWrite-type>
+			<com.twofortyfouram.locale.intent.extra.BLURB>Type: Text
+			Value: At Time, Tap to set Time.
+			Action : Click</com.twofortyfouram.locale.intent.extra.BLURB>
+			<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES>&lt;StringArray sr=""&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;%err
+			Error Code
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;%errmsg
+			Error Message
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;&lt;/StringArray&gt;</net.dinglisch.android.tasker.RELEVANT_VARIABLES>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>[Ljava.lang.String;</net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>ActionId FieldSelectionType ActionType plugininstanceid plugintypeid </net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+			<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+			<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+			<plugininstanceid>1fc6aed7-1b82-431a-aaf7-ea2e74360ab7</plugininstanceid>
+			<plugininstanceid-type>java.lang.String</plugininstanceid-type>
+			<plugintypeid>com.joaomgcd.autoinput.intent.IntentPerformAction</plugintypeid>
+			<plugintypeid-type>java.lang.String</plugintypeid-type>
+			</Vals>
+			</Bundle>
+			<Str sr="arg1" ve="3">com.joaomgcd.autoinput</Str>
+			<Str sr="arg2" ve="3">com.joaomgcd.autoinput.activity.ActivityConfigPerformAction</Str>
+			<Int sr="arg3" val="23"/>
+			</Action>
+			<Action sr="act23" ve="7">
+			<code>30</code>
+			<Int sr="arg0" val="0"/>
+			<Int sr="arg1" val="3"/>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			</Action>
+			<Action sr="act24" ve="7">
+			<code>1732635924</code>
+			<Bundle sr="arg0">
+			<Vals sr="val">
+			<ActionId>Switch to text input mode for the time input.</ActionId>
+			<ActionId-type>java.lang.String</ActionId-type>
+			<ActionType>16</ActionType>
+			<ActionType-type>java.lang.String</ActionType-type>
+			<EnableDisableAccessibilityService>&lt;null&gt;</EnableDisableAccessibilityService>
+			<EnableDisableAccessibilityService-type>java.lang.String</EnableDisableAccessibilityService-type>
+			<FieldSelectionType>0</FieldSelectionType>
+			<FieldSelectionType-type>java.lang.String</FieldSelectionType-type>
+			<IsFirstAction>false</IsFirstAction>
+			<IsFirstAction-type>java.lang.Boolean</IsFirstAction-type>
+			<IsTaskerAction>false</IsTaskerAction>
+			<IsTaskerAction-type>java.lang.Boolean</IsTaskerAction-type>
+			<NearbyText>&lt;null&gt;</NearbyText>
+			<NearbyText-type>java.lang.String</NearbyText-type>
+			<Password>&lt;null&gt;</Password>
+			<Password-type>java.lang.String</Password-type>
+			<RepeatInterval>&lt;null&gt;</RepeatInterval>
+			<RepeatInterval-type>java.lang.String</RepeatInterval-type>
+			<RepeatTimes>&lt;null&gt;</RepeatTimes>
+			<RepeatTimes-type>java.lang.String</RepeatTimes-type>
+			<StoredAction>&lt;null&gt;</StoredAction>
+			<StoredAction-type>java.lang.String</StoredAction-type>
+			<TextToWrite>&lt;null&gt;</TextToWrite>
+			<TextToWrite-type>java.lang.String</TextToWrite-type>
+			<com.twofortyfouram.locale.intent.extra.BLURB>Type: Text
+			Value: Switch to text input mode for the time input.
+			Action : Click</com.twofortyfouram.locale.intent.extra.BLURB>
+			<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES>&lt;StringArray sr=""&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;%err
+			Error Code
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;%errmsg
+			Error Message
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;&lt;/StringArray&gt;</net.dinglisch.android.tasker.RELEVANT_VARIABLES>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>[Ljava.lang.String;</net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>ActionId FieldSelectionType ActionType plugininstanceid plugintypeid </net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+			<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+			<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+			<plugininstanceid>6075b57c-8ab8-4690-9a89-8fe5e0c310e7</plugininstanceid>
+			<plugininstanceid-type>java.lang.String</plugininstanceid-type>
+			<plugintypeid>com.joaomgcd.autoinput.intent.IntentPerformAction</plugintypeid>
+			<plugintypeid-type>java.lang.String</plugintypeid-type>
+			</Vals>
+			</Bundle>
+			<Str sr="arg1" ve="3">com.joaomgcd.autoinput</Str>
+			<Str sr="arg2" ve="3">com.joaomgcd.autoinput.activity.ActivityConfigPerformAction</Str>
+			<Int sr="arg3" val="23"/>
+			</Action>
+			<Action sr="act25" ve="7">
+			<code>30</code>
+			<Int sr="arg0" val="0"/>
+			<Int sr="arg1" val="3"/>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			</Action>
+			<Action sr="act26" ve="7">
+			<code>105</code>
+			<Str sr="arg0" ve="3">`+frame.parts[1].value.trim()+`</Str>
+			<Int sr="arg1" val="0"/>
+			</Action>
+			<Action sr="act27" ve="7">
+			<code>1732635924</code>
+			<Bundle sr="arg0">
+			<Vals sr="val">
+			<ActionId>android:id/input_hour</ActionId>
+			<ActionId-type>java.lang.String</ActionId-type>
+			<ActionType>32768</ActionType>
+			<ActionType-type>java.lang.String</ActionType-type>
+			<EnableDisableAccessibilityService>&lt;null&gt;</EnableDisableAccessibilityService>
+			<EnableDisableAccessibilityService-type>java.lang.String</EnableDisableAccessibilityService-type>
+			<FieldSelectionType>1</FieldSelectionType>
+			<FieldSelectionType-type>java.lang.String</FieldSelectionType-type>
+			<IsFirstAction>false</IsFirstAction>
+			<IsFirstAction-type>java.lang.Boolean</IsFirstAction-type>
+			<IsTaskerAction>false</IsTaskerAction>
+			<IsTaskerAction-type>java.lang.Boolean</IsTaskerAction-type>
+			<NearbyText>&lt;null&gt;</NearbyText>
+			<NearbyText-type>java.lang.String</NearbyText-type>
+			<Password>&lt;null&gt;</Password>
+			<Password-type>java.lang.String</Password-type>
+			<RepeatInterval>&lt;null&gt;</RepeatInterval>
+			<RepeatInterval-type>java.lang.String</RepeatInterval-type>
+			<RepeatTimes>&lt;null&gt;</RepeatTimes>
+			<RepeatTimes-type>java.lang.String</RepeatTimes-type>
+			<StoredAction>&lt;null&gt;</StoredAction>
+			<StoredAction-type>java.lang.String</StoredAction-type>
+			<TextToWrite>&lt;null&gt;</TextToWrite>
+			<TextToWrite-type>java.lang.String</TextToWrite-type>
+			<com.twofortyfouram.locale.intent.extra.BLURB>Type: Id
+			Value: android:id/input_hour
+			Action : Paste</com.twofortyfouram.locale.intent.extra.BLURB>
+			<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES>&lt;StringArray sr=""&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;%err
+			Error Code
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;%errmsg
+			Error Message
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;&lt;/StringArray&gt;</net.dinglisch.android.tasker.RELEVANT_VARIABLES>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>[Ljava.lang.String;</net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>ActionId FieldSelectionType ActionType plugininstanceid plugintypeid </net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+			<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+			<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+			<plugininstanceid>a96920d2-5b70-445d-bc3a-84e6dbe36bc8</plugininstanceid>
+			<plugininstanceid-type>java.lang.String</plugininstanceid-type>
+			<plugintypeid>com.joaomgcd.autoinput.intent.IntentPerformAction</plugintypeid>
+			<plugintypeid-type>java.lang.String</plugintypeid-type>
+			</Vals>
+			</Bundle>
+			<Str sr="arg1" ve="3">com.joaomgcd.autoinput</Str>
+			<Str sr="arg2" ve="3">com.joaomgcd.autoinput.activity.ActivityConfigPerformAction</Str>
+			<Int sr="arg3" val="23"/>
+			</Action>
+			<Action sr="act28" ve="7">
+			<code>30</code>
+			<Int sr="arg0" val="0"/>
+			<Int sr="arg1" val="3"/>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			</Action>\n`
+			}
+			if(frame.parts[2].value!=null){
+			min_val=`<Action sr="act29" ve="7">
+			hour_val=<code>105</code>
+			<Str sr="arg0" ve="3">`+frame.parts[2].value.trim()+`</Str>
+			<Int sr="arg1" val="0"/>
+			</Action>
+			<Action sr="act3" ve="7">
+			<code>30</code>
+			<Int sr="arg0" val="0"/>
+			<Int sr="arg1" val="3"/>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			</Action>
+			<Action sr="act30" ve="7">
+			<code>1732635924</code>
+			<Bundle sr="arg0">
+			<Vals sr="val">
+			<ActionId>android:id/input_minute</ActionId>
+			<ActionId-type>java.lang.String</ActionId-type>
+			<ActionType>32768</ActionType>
+			<ActionType-type>java.lang.String</ActionType-type>
+			<EnableDisableAccessibilityService>&lt;null&gt;</EnableDisableAccessibilityService>
+			<EnableDisableAccessibilityService-type>java.lang.String</EnableDisableAccessibilityService-type>
+			<FieldSelectionType>1</FieldSelectionType>
+			<FieldSelectionType-type>java.lang.String</FieldSelectionType-type>
+			<IsFirstAction>false</IsFirstAction>
+			<IsFirstAction-type>java.lang.Boolean</IsFirstAction-type>
+			<IsTaskerAction>false</IsTaskerAction>
+			<IsTaskerAction-type>java.lang.Boolean</IsTaskerAction-type>
+			<NearbyText>&lt;null&gt;</NearbyText>
+			<NearbyText-type>java.lang.String</NearbyText-type>
+			<Password>&lt;null&gt;</Password>
+			<Password-type>java.lang.String</Password-type>
+			<RepeatInterval>&lt;null&gt;</RepeatInterval>
+			<RepeatInterval-type>java.lang.String</RepeatInterval-type>
+			<RepeatTimes>&lt;null&gt;</RepeatTimes>
+			<RepeatTimes-type>java.lang.String</RepeatTimes-type>
+			<StoredAction>&lt;null&gt;</StoredAction>
+			<StoredAction-type>java.lang.String</StoredAction-type>
+			<TextToWrite>&lt;null&gt;</TextToWrite>
+			<TextToWrite-type>java.lang.String</TextToWrite-type>
+			<com.twofortyfouram.locale.intent.extra.BLURB>Type: Id
+			Value: android:id/input_minute
+			Action : Paste</com.twofortyfouram.locale.intent.extra.BLURB>
+			<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES>&lt;StringArray sr=""&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;%err
+			Error Code
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;%errmsg
+			Error Message
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;&lt;/StringArray&gt;</net.dinglisch.android.tasker.RELEVANT_VARIABLES>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>[Ljava.lang.String;</net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>ActionId FieldSelectionType ActionType plugininstanceid plugintypeid </net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+			<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+			<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+			<plugininstanceid>6055f920-7caf-4f94-8845-36ddfad0d43c</plugininstanceid>
+			<plugininstanceid-type>java.lang.String</plugininstanceid-type>
+			<plugintypeid>com.joaomgcd.autoinput.intent.IntentPerformAction</plugintypeid>
+			<plugintypeid-type>java.lang.String</plugintypeid-type>
+			</Vals>
+			</Bundle>
+			<Str sr="arg1" ve="3">com.joaomgcd.autoinput</Str>
+			<Str sr="arg2" ve="3">com.joaomgcd.autoinput.activity.ActivityConfigPerformAction</Str>
+			<Int sr="arg3" val="23"/>
+			</Action>
+			<Action sr="act31" ve="7">
+			<code>30</code>
+			<Int sr="arg0" val="0"/>
+			<Int sr="arg1" val="3"/>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			</Action>>\n`
+			}
+			if(frame.parts[3].value!=null){
+			merediem_val=
+			`<Action sr="act32" ve="7">
+			<code>1732635924</code>
+			<Bundle sr="arg0">
+			<Vals sr="val">
+			<ActionId>android:id/am_pm_spinner</ActionId>
+			<ActionId-type>java.lang.String</ActionId-type>
+			<ActionType>16</ActionType>
+			<ActionType-type>java.lang.String</ActionType-type>
+			<EnableDisableAccessibilityService>&lt;null&gt;</EnableDisableAccessibilityService>
+			<EnableDisableAccessibilityService-type>java.lang.String</EnableDisableAccessibilityService-type>
+			<FieldSelectionType>1</FieldSelectionType>
+			<FieldSelectionType-type>java.lang.String</FieldSelectionType-type>
+			<IsFirstAction>false</IsFirstAction>
+			<IsFirstAction-type>java.lang.Boolean</IsFirstAction-type>
+			<IsTaskerAction>false</IsTaskerAction>
+			<IsTaskerAction-type>java.lang.Boolean</IsTaskerAction-type>
+			<NearbyText>&lt;null&gt;</NearbyText>
+			<NearbyText-type>java.lang.String</NearbyText-type>
+			<Password>&lt;null&gt;</Password>
+			<Password-type>java.lang.String</Password-type>
+			<RepeatInterval>&lt;null&gt;</RepeatInterval>
+			<RepeatInterval-type>java.lang.String</RepeatInterval-type>
+			<RepeatTimes>&lt;null&gt;</RepeatTimes>
+			<RepeatTimes-type>java.lang.String</RepeatTimes-type>
+			<StoredAction>&lt;null&gt;</StoredAction>
+			<StoredAction-type>java.lang.String</StoredAction-type>
+			<TextToWrite>&lt;null&gt;</TextToWrite>
+			<TextToWrite-type>java.lang.String</TextToWrite-type>
+			<com.twofortyfouram.locale.intent.extra.BLURB>Type: Id
+			Value: android:id/am_pm_spinner
+			Action : Click</com.twofortyfouram.locale.intent.extra.BLURB>
+			<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES>&lt;StringArray sr=""&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;%err
+			Error Code
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;%errmsg
+			Error Message
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;&lt;/StringArray&gt;</net.dinglisch.android.tasker.RELEVANT_VARIABLES>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>[Ljava.lang.String;</net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>ActionId FieldSelectionType ActionType plugininstanceid plugintypeid </net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+			<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+			<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+			<plugininstanceid>120eaa24-3b4f-4310-9803-215bab1ba3d4</plugininstanceid>
+			<plugininstanceid-type>java.lang.String</plugininstanceid-type>
+			<plugintypeid>com.joaomgcd.autoinput.intent.IntentPerformAction</plugintypeid>
+			<plugintypeid-type>java.lang.String</plugintypeid-type>
+			</Vals>
+			</Bundle>
+			<Str sr="arg1" ve="3">com.joaomgcd.autoinput</Str>
+			<Str sr="arg2" ve="3">com.joaomgcd.autoinput.activity.ActivityConfigPerformAction</Str>
+			<Int sr="arg3" val="23"/>
+			</Action>
+			<Action sr="act33" ve="7">
+			<code>30</code>
+			<Int sr="arg0" val="0"/>
+			<Int sr="arg1" val="3"/>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			</Action>
+			<Action sr="act34" ve="7">
+			<code>1732635924</code>
+			<Bundle sr="arg0">
+			<Vals sr="val">
+			<ActionId>`+frame.parts[3].value.trim()+`</ActionId>
+			<ActionId-type>java.lang.String</ActionId-type>
+			<ActionType>16</ActionType>
+			<ActionType-type>java.lang.String</ActionType-type>
+			<EnableDisableAccessibilityService>&lt;null&gt;</EnableDisableAccessibilityService>
+			<EnableDisableAccessibilityService-type>java.lang.String</EnableDisableAccessibilityService-type>
+			<FieldSelectionType>0</FieldSelectionType>
+			<FieldSelectionType-type>java.lang.String</FieldSelectionType-type>
+			<IsFirstAction>false</IsFirstAction>
+			<IsFirstAction-type>java.lang.Boolean</IsFirstAction-type>
+			<IsTaskerAction>false</IsTaskerAction>
+			<IsTaskerAction-type>java.lang.Boolean</IsTaskerAction-type>
+			<NearbyText>&lt;null&gt;</NearbyText>
+			<NearbyText-type>java.lang.String</NearbyText-type>
+			<Password>&lt;null&gt;</Password>
+			<Password-type>java.lang.String</Password-type>
+			<RepeatInterval>&lt;null&gt;</RepeatInterval>
+			<RepeatInterval-type>java.lang.String</RepeatInterval-type>
+			<RepeatTimes>&lt;null&gt;</RepeatTimes>
+			<RepeatTimes-type>java.lang.String</RepeatTimes-type>
+			<StoredAction>&lt;null&gt;</StoredAction>
+			<StoredAction-type>java.lang.String</StoredAction-type>
+			<TextToWrite>&lt;null&gt;</TextToWrite>
+			<TextToWrite-type>java.lang.String</TextToWrite-type>
+			<com.twofortyfouram.locale.intent.extra.BLURB>Type: Text
+			Value: `+frame.parts[3].value.trim()+`
+			Action : Click</com.twofortyfouram.locale.intent.extra.BLURB>
+			<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES>&lt;StringArray sr=""&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;%err
+			Error Code
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;%errmsg
+			Error Message
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;&lt;/StringArray&gt;</net.dinglisch.android.tasker.RELEVANT_VARIABLES>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>[Ljava.lang.String;</net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>ActionId FieldSelectionType ActionType plugininstanceid plugintypeid </net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+			<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+			<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+			<plugininstanceid>08e9afe7-0dbc-46b2-ad5d-5d7876c1769c</plugininstanceid>
+			<plugininstanceid-type>java.lang.String</plugininstanceid-type>
+			<plugintypeid>com.joaomgcd.autoinput.intent.IntentPerformAction</plugintypeid>
+			<plugintypeid-type>java.lang.String</plugintypeid-type>
+			</Vals>
+			</Bundle>
+			<Str sr="arg1" ve="3">com.joaomgcd.autoinput</Str>
+			<Str sr="arg2" ve="3">com.joaomgcd.autoinput.activity.ActivityConfigPerformAction</Str>
+			<Int sr="arg3" val="23"/>
+			</Action>
+			<Action sr="act35" ve="7">
+			<code>30</code>
+			<Int sr="arg0" val="0"/>
+			<Int sr="arg1" val="3"/>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			</Action>
+			<Action sr="act36" ve="7">
+			<code>1732635924</code>
+			<Bundle sr="arg0">
+			<Vals sr="val">
+			<ActionId>OK</ActionId>
+			<ActionId-type>java.lang.String</ActionId-type>
+			<ActionType>16</ActionType>
+			<ActionType-type>java.lang.String</ActionType-type>
+			<EnableDisableAccessibilityService>&lt;null&gt;</EnableDisableAccessibilityService>
+			<EnableDisableAccessibilityService-type>java.lang.String</EnableDisableAccessibilityService-type>
+			<FieldSelectionType>0</FieldSelectionType>
+			<FieldSelectionType-type>java.lang.String</FieldSelectionType-type>
+			<IsFirstAction>false</IsFirstAction>
+			<IsFirstAction-type>java.lang.Boolean</IsFirstAction-type>
+			<IsTaskerAction>false</IsTaskerAction>
+			<IsTaskerAction-type>java.lang.Boolean</IsTaskerAction-type>
+			<NearbyText>&lt;null&gt;</NearbyText>
+			<NearbyText-type>java.lang.String</NearbyText-type>
+			<Password>&lt;null&gt;</Password>
+			<Password-type>java.lang.String</Password-type>
+			<RepeatInterval>&lt;null&gt;</RepeatInterval>
+			<RepeatInterval-type>java.lang.String</RepeatInterval-type>
+			<RepeatTimes>&lt;null&gt;</RepeatTimes>
+			<RepeatTimes-type>java.lang.String</RepeatTimes-type>
+			<StoredAction>&lt;null&gt;</StoredAction>
+			<StoredAction-type>java.lang.String</StoredAction-type>
+			<TextToWrite>&lt;null&gt;</TextToWrite>
+			<TextToWrite-type>java.lang.String</TextToWrite-type>
+			<com.twofortyfouram.locale.intent.extra.BLURB>Type: Text
+			Value: OK
+			Action : Click</com.twofortyfouram.locale.intent.extra.BLURB>
+			<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES>&lt;StringArray sr=""&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;%err
+			Error Code
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;%errmsg
+			Error Message
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;&lt;/StringArray&gt;</net.dinglisch.android.tasker.RELEVANT_VARIABLES>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>[Ljava.lang.String;</net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>ActionId FieldSelectionType ActionType plugininstanceid plugintypeid </net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+			<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+			<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+			<plugininstanceid>46af0920-a0f8-4c18-8990-000e2bcb08d7</plugininstanceid>
+			<plugininstanceid-type>java.lang.String</plugininstanceid-type>
+			<plugintypeid>com.joaomgcd.autoinput.intent.IntentPerformAction</plugintypeid>
+			<plugintypeid-type>java.lang.String</plugintypeid-type>
+			</Vals>
+			</Bundle>
+			<Str sr="arg1" ve="3">com.joaomgcd.autoinput</Str>
+			<Str sr="arg2" ve="3">com.joaomgcd.autoinput.activity.ActivityConfigPerformAction</Str>
+			<Int sr="arg3" val="23"/>
+			</Action>
+			<Action sr="act37" ve="7">
+			<code>30</code>
+			<Int sr="arg0" val="0"/>
+			<Int sr="arg1" val="3"/>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			</Action>\n`
+
+		}
+			finished=finished && processSimpleSlot(frame,frame.parts[i]);
+		}
+		else if(partType=="checkboxesSlot")
+		{
+			if(frame.parts[4].value!=null){
+			day_val="";
+			switch(frame.parts[4].value.trim()){
+				case "Mo":
+				day_val="Monday";
+				break;
+				case "Tu":
+				day_val="Tuesday";
+				break;
+				case "We":
+				day_val="Wednesday";
+				break;
+				case "Th":
+				day_val="Thursday";
+				break;
+				case "Fr":
+				day_val="Friday";
+				break;
+				case "Sa":
+				day_val="Saturday";
+				break;
+				case "Su":
+				day_val="Sunday";
+				break;
+			}
+			day_value = `<Action sr="act38" ve="7">
+			<code>1732635924</code>
+			<Bundle sr="arg0">
+			<Vals sr="val">
+			<ActionId>Repeat</ActionId>
+			<ActionId-type>java.lang.String</ActionId-type>
+			<ActionType>16</ActionType>
+			<ActionType-type>java.lang.String</ActionType-type>
+			<EnableDisableAccessibilityService>&lt;null&gt;</EnableDisableAccessibilityService>
+			<EnableDisableAccessibilityService-type>java.lang.String</EnableDisableAccessibilityService-type>
+			<FieldSelectionType>0</FieldSelectionType>
+			<FieldSelectionType-type>java.lang.String</FieldSelectionType-type>
+			<IsFirstAction>false</IsFirstAction>
+			<IsFirstAction-type>java.lang.Boolean</IsFirstAction-type>
+			<IsTaskerAction>false</IsTaskerAction>
+			<IsTaskerAction-type>java.lang.Boolean</IsTaskerAction-type>
+			<NearbyText>&lt;null&gt;</NearbyText>
+			<NearbyText-type>java.lang.String</NearbyText-type>
+			<Password>&lt;null&gt;</Password>
+			<Password-type>java.lang.String</Password-type>
+			<RepeatInterval>&lt;null&gt;</RepeatInterval>
+			<RepeatInterval-type>java.lang.String</RepeatInterval-type>
+			<RepeatTimes>&lt;null&gt;</RepeatTimes>
+			<RepeatTimes-type>java.lang.String</RepeatTimes-type>
+			<StoredAction>&lt;null&gt;</StoredAction>
+			<StoredAction-type>java.lang.String</StoredAction-type>
+			<TextToWrite>&lt;null&gt;</TextToWrite>
+			<TextToWrite-type>java.lang.String</TextToWrite-type>
+			<com.twofortyfouram.locale.intent.extra.BLURB>Type: Text
+			Value: Repeat
+			Action : Click</com.twofortyfouram.locale.intent.extra.BLURB>
+			<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES>&lt;StringArray sr=""&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;%err
+			Error Code
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;%errmsg
+			Error Message
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;&lt;/StringArray&gt;</net.dinglisch.android.tasker.RELEVANT_VARIABLES>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>[Ljava.lang.String;</net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>ActionId FieldSelectionType ActionType plugininstanceid plugintypeid </net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+			<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+			<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+			<plugininstanceid>c71cc6d7-4024-4552-bbcf-c05fb90b1dca</plugininstanceid>
+			<plugininstanceid-type>java.lang.String</plugininstanceid-type>
+			<plugintypeid>com.joaomgcd.autoinput.intent.IntentPerformAction</plugintypeid>
+			<plugintypeid-type>java.lang.String</plugintypeid-type>
+			</Vals>
+			</Bundle>
+			<Str sr="arg1" ve="3">com.joaomgcd.autoinput</Str>
+			<Str sr="arg2" ve="3">com.joaomgcd.autoinput.activity.ActivityConfigPerformAction</Str>
+			<Int sr="arg3" val="23"/>
+			</Action>
+			<Action sr="act39" ve="7">
+			<code>30</code>
+			<Int sr="arg0" val="0"/>
+			<Int sr="arg1" val="3"/>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			</Action>
+			<Action sr="act4" ve="7">
+			<code>1732635924</code>
+			<Bundle sr="arg0">
+			<Vals sr="val">
+			<ActionId>Routines</ActionId>
+			<ActionId-type>java.lang.String</ActionId-type>
+			<ActionType>16</ActionType>
+			<ActionType-type>java.lang.String</ActionType-type>
+			<EnableDisableAccessibilityService>&lt;null&gt;</EnableDisableAccessibilityService>
+			<EnableDisableAccessibilityService-type>java.lang.String</EnableDisableAccessibilityService-type>
+			<FieldSelectionType>0</FieldSelectionType>
+			<FieldSelectionType-type>java.lang.String</FieldSelectionType-type>
+			<IsFirstAction>false</IsFirstAction>
+			<IsFirstAction-type>java.lang.Boolean</IsFirstAction-type>
+			<IsTaskerAction>false</IsTaskerAction>
+			<IsTaskerAction-type>java.lang.Boolean</IsTaskerAction-type>
+			<NearbyText>&lt;null&gt;</NearbyText>
+			<NearbyText-type>java.lang.String</NearbyText-type>
+			<Password>&lt;null&gt;</Password>
+			<Password-type>java.lang.String</Password-type>
+			<RepeatInterval>&lt;null&gt;</RepeatInterval>
+			<RepeatInterval-type>java.lang.String</RepeatInterval-type>
+			<RepeatTimes>&lt;null&gt;</RepeatTimes>
+			<RepeatTimes-type>java.lang.String</RepeatTimes-type>
+			<StoredAction>&lt;null&gt;</StoredAction>
+			<StoredAction-type>java.lang.String</StoredAction-type>
+			<TextToWrite>&lt;null&gt;</TextToWrite>
+			<TextToWrite-type>java.lang.String</TextToWrite-type>
+			<com.twofortyfouram.locale.intent.extra.BLURB>Type: Text
+			Value: Routines
+			Action : Click</com.twofortyfouram.locale.intent.extra.BLURB>
+			<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES>&lt;StringArray sr=""&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;%err
+			Error Code
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;%errmsg
+			Error Message
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;&lt;/StringArray&gt;</net.dinglisch.android.tasker.RELEVANT_VARIABLES>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>[Ljava.lang.String;</net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>ActionId FieldSelectionType ActionType plugininstanceid plugintypeid </net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+			<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+			<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+			<plugininstanceid>27777531-11f5-4b05-9004-61817abb25e8</plugininstanceid>
+			<plugininstanceid-type>java.lang.String</plugininstanceid-type>
+			<plugintypeid>com.joaomgcd.autoinput.intent.IntentPerformAction</plugintypeid>
+			<plugintypeid-type>java.lang.String</plugintypeid-type>
+			</Vals>
+			</Bundle>
+			<Str sr="arg1" ve="3">com.joaomgcd.autoinput</Str>
+			<Str sr="arg2" ve="3">com.joaomgcd.autoinput.activity.ActivityConfigPerformAction</Str>
+			<Int sr="arg3" val="23"/>
+			</Action>
+			<Action sr="act40" ve="7">
+			<code>1732635924</code>
+			<Bundle sr="arg0">
+			<Vals sr="val">
+			<ActionId>`+day_val+`</ActionId>
+			<ActionId-type>java.lang.String</ActionId-type>
+			<ActionType>16</ActionType>
+			<ActionType-type>java.lang.String</ActionType-type>
+			<EnableDisableAccessibilityService>&lt;null&gt;</EnableDisableAccessibilityService>
+			<EnableDisableAccessibilityService-type>java.lang.String</EnableDisableAccessibilityService-type>
+			<FieldSelectionType>0</FieldSelectionType>
+			<FieldSelectionType-type>java.lang.String</FieldSelectionType-type>
+			<IsFirstAction>false</IsFirstAction>
+			<IsFirstAction-type>java.lang.Boolean</IsFirstAction-type>
+			<IsTaskerAction>false</IsTaskerAction>
+			<IsTaskerAction-type>java.lang.Boolean</IsTaskerAction-type>
+			<NearbyText>&lt;null&gt;</NearbyText>
+			<NearbyText-type>java.lang.String</NearbyText-type>
+			<Password>&lt;null&gt;</Password>
+			<Password-type>java.lang.String</Password-type>
+			<RepeatInterval>&lt;null&gt;</RepeatInterval>
+			<RepeatInterval-type>java.lang.String</RepeatInterval-type>
+			<RepeatTimes>&lt;null&gt;</RepeatTimes>
+			<RepeatTimes-type>java.lang.String</RepeatTimes-type>
+			<StoredAction>&lt;null&gt;</StoredAction>
+			<StoredAction-type>java.lang.String</StoredAction-type>
+			<TextToWrite>&lt;null&gt;</TextToWrite>
+			<TextToWrite-type>java.lang.String</TextToWrite-type>
+			<com.twofortyfouram.locale.intent.extra.BLURB>Type: Text
+			Value: `+day_val+`
+			Action : Click</com.twofortyfouram.locale.intent.extra.BLURB>
+			<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES>&lt;StringArray sr=""&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;%err
+			Error Code
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;%errmsg
+			Error Message
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;&lt;/StringArray&gt;</net.dinglisch.android.tasker.RELEVANT_VARIABLES>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>[Ljava.lang.String;</net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>ActionId FieldSelectionType ActionType plugininstanceid plugintypeid </net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+			<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+			<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+			<plugininstanceid>0c0d6bf4-6ebe-4e9d-b6a2-0949059eb7fe</plugininstanceid>
+			<plugininstanceid-type>java.lang.String</plugininstanceid-type>
+			<plugintypeid>com.joaomgcd.autoinput.intent.IntentPerformAction</plugintypeid>
+			<plugintypeid-type>java.lang.String</plugintypeid-type>
+			</Vals>
+			</Bundle>
+			<Str sr="arg1" ve="3">com.joaomgcd.autoinput</Str>
+			<Str sr="arg2" ve="3">com.joaomgcd.autoinput.activity.ActivityConfigPerformAction</Str>
+			<Int sr="arg3" val="23"/>
+			</Action>
+			<Action sr="act41" ve="7">
+			<code>30</code>
+			<Int sr="arg0" val="0"/>
+			<Int sr="arg1" val="3"/>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			</Action>
+			<Action sr="act42" ve="7">
+			<code>1732635924</code>
+			<Bundle sr="arg0">
+			<Vals sr="val">
+			<ActionId>Next</ActionId>
+			<ActionId-type>java.lang.String</ActionId-type>
+			<ActionType>16</ActionType>
+			<ActionType-type>java.lang.String</ActionType-type>
+			<EnableDisableAccessibilityService>&lt;null&gt;</EnableDisableAccessibilityService>
+			<EnableDisableAccessibilityService-type>java.lang.String</EnableDisableAccessibilityService-type>
+			<FieldSelectionType>0</FieldSelectionType>
+			<FieldSelectionType-type>java.lang.String</FieldSelectionType-type>
+			<IsFirstAction>false</IsFirstAction>
+			<IsFirstAction-type>java.lang.Boolean</IsFirstAction-type>
+			<IsTaskerAction>false</IsTaskerAction>
+			<IsTaskerAction-type>java.lang.Boolean</IsTaskerAction-type>
+			<NearbyText>&lt;null&gt;</NearbyText>
+			<NearbyText-type>java.lang.String</NearbyText-type>
+			<Password>&lt;null&gt;</Password>
+			<Password-type>java.lang.String</Password-type>
+			<RepeatInterval>&lt;null&gt;</RepeatInterval>
+			<RepeatInterval-type>java.lang.String</RepeatInterval-type>
+			<RepeatTimes>&lt;null&gt;</RepeatTimes>
+			<RepeatTimes-type>java.lang.String</RepeatTimes-type>
+			<StoredAction>&lt;null&gt;</StoredAction>
+			<StoredAction-type>java.lang.String</StoredAction-type>
+			<TextToWrite>&lt;null&gt;</TextToWrite>
+			<TextToWrite-type>java.lang.String</TextToWrite-type>
+			<com.twofortyfouram.locale.intent.extra.BLURB>Type: Text
+			Value: Next
+			Action : Click</com.twofortyfouram.locale.intent.extra.BLURB>
+			<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES>&lt;StringArray sr=""&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;%err
+			Error Code
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;%errmsg
+			Error Message
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;&lt;/StringArray&gt;</net.dinglisch.android.tasker.RELEVANT_VARIABLES>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>[Ljava.lang.String;</net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>ActionId FieldSelectionType ActionType plugininstanceid plugintypeid </net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+			<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+			<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+			<plugininstanceid>542ea465-edea-4711-9115-539c5d1b5806</plugininstanceid>
+			<plugininstanceid-type>java.lang.String</plugininstanceid-type>
+			<plugintypeid>com.joaomgcd.autoinput.intent.IntentPerformAction</plugintypeid>
+			<plugintypeid-type>java.lang.String</plugintypeid-type>
+			</Vals>
+			</Bundle>
+			<Str sr="arg1" ve="3">com.joaomgcd.autoinput</Str>
+			<Str sr="arg2" ve="3">com.joaomgcd.autoinput.activity.ActivityConfigPerformAction</Str>
+			<Int sr="arg3" val="23"/>
+			</Action>
+			<Action sr="act43" ve="7">
+			<code>30</code>
+			<Int sr="arg0" val="0"/>
+			<Int sr="arg1" val="3"/>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			</Action>
+			<Action sr="act44" ve="7">
+			<code>1732635924</code>
+			<Bundle sr="arg0">
+			<Vals sr="val">
+			<ActionId>Add action ex. Play weather</ActionId>
+			<ActionId-type>java.lang.String</ActionId-type>
+			<ActionType>16</ActionType>
+			<ActionType-type>java.lang.String</ActionType-type>
+			<EnableDisableAccessibilityService>&lt;null&gt;</EnableDisableAccessibilityService>
+			<EnableDisableAccessibilityService-type>java.lang.String</EnableDisableAccessibilityService-type>
+			<FieldSelectionType>0</FieldSelectionType>
+			<FieldSelectionType-type>java.lang.String</FieldSelectionType-type>
+			<IsFirstAction>false</IsFirstAction>
+			<IsFirstAction-type>java.lang.Boolean</IsFirstAction-type>
+			<IsTaskerAction>false</IsTaskerAction>
+			<IsTaskerAction-type>java.lang.Boolean</IsTaskerAction-type>
+			<NearbyText>&lt;null&gt;</NearbyText>
+			<NearbyText-type>java.lang.String</NearbyText-type>
+			<Password>&lt;null&gt;</Password>
+			<Password-type>java.lang.String</Password-type>
+			<RepeatInterval>&lt;null&gt;</RepeatInterval>
+			<RepeatInterval-type>java.lang.String</RepeatInterval-type>
+			<RepeatTimes>&lt;null&gt;</RepeatTimes>
+			<RepeatTimes-type>java.lang.String</RepeatTimes-type>
+			<StoredAction>&lt;null&gt;</StoredAction>
+			<StoredAction-type>java.lang.String</StoredAction-type>
+			<TextToWrite>&lt;null&gt;</TextToWrite>
+			<TextToWrite-type>java.lang.String</TextToWrite-type>
+			<com.twofortyfouram.locale.intent.extra.BLURB>Type: Text
+			Value: Add action ex. Play weather
+			Action : Click</com.twofortyfouram.locale.intent.extra.BLURB>
+			<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES>&lt;StringArray sr=""&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;%err
+			Error Code
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;%errmsg
+			Error Message
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;&lt;/StringArray&gt;</net.dinglisch.android.tasker.RELEVANT_VARIABLES>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>[Ljava.lang.String;</net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>ActionId FieldSelectionType ActionType plugininstanceid plugintypeid </net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+			<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+			<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+			<plugininstanceid>f912815d-3941-4983-8ef5-09f199dc5b90</plugininstanceid>
+			<plugininstanceid-type>java.lang.String</plugininstanceid-type>
+			<plugintypeid>com.joaomgcd.autoinput.intent.IntentPerformAction</plugintypeid>
+			<plugintypeid-type>java.lang.String</plugintypeid-type>
+			</Vals>
+			</Bundle>
+			<Str sr="arg1" ve="3">com.joaomgcd.autoinput</Str>
+			<Str sr="arg2" ve="3">com.joaomgcd.autoinput.activity.ActivityConfigPerformAction</Str>
+			<Int sr="arg3" val="23"/>
+			</Action>
+			<Action sr="act45" ve="7">
+			<code>30</code>
+			<Int sr="arg0" val="0"/>
+			<Int sr="arg1" val="3"/>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			</Action>
+			<Action sr="act46" ve="7">
+			<code>1732635924</code>
+			<Bundle sr="arg0">
+			<Vals sr="val">
+			<ActionId>Calendar</ActionId>
+			<ActionId-type>java.lang.String</ActionId-type>
+			<ActionType>4096</ActionType>
+			<ActionType-type>java.lang.String</ActionType-type>
+			<EnableDisableAccessibilityService>&lt;null&gt;</EnableDisableAccessibilityService>
+			<EnableDisableAccessibilityService-type>java.lang.String</EnableDisableAccessibilityService-type>
+			<FieldSelectionType>0</FieldSelectionType>
+			<FieldSelectionType-type>java.lang.String</FieldSelectionType-type>
+			<IsFirstAction>false</IsFirstAction>
+			<IsFirstAction-type>java.lang.Boolean</IsFirstAction-type>
+			<IsTaskerAction>false</IsTaskerAction>
+			<IsTaskerAction-type>java.lang.Boolean</IsTaskerAction-type>
+			<NearbyText>&lt;null&gt;</NearbyText>
+			<NearbyText-type>java.lang.String</NearbyText-type>
+			<Password>&lt;null&gt;</Password>
+			<Password-type>java.lang.String</Password-type>
+			<RepeatInterval>&lt;null&gt;</RepeatInterval>
+			<RepeatInterval-type>java.lang.String</RepeatInterval-type>
+			<RepeatTimes>&lt;null&gt;</RepeatTimes>
+			<RepeatTimes-type>java.lang.String</RepeatTimes-type>
+			<StoredAction>&lt;null&gt;</StoredAction>
+			<StoredAction-type>java.lang.String</StoredAction-type>
+			<TextToWrite>&lt;null&gt;</TextToWrite>
+			<TextToWrite-type>java.lang.String</TextToWrite-type>
+			<com.twofortyfouram.locale.intent.extra.BLURB>Type: Text
+			Value: Calendar
+			Action : Scroll Forward</com.twofortyfouram.locale.intent.extra.BLURB>
+			<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES>&lt;StringArray sr=""&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;%err
+			Error Code
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;%errmsg
+			Error Message
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;&lt;/StringArray&gt;</net.dinglisch.android.tasker.RELEVANT_VARIABLES>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>[Ljava.lang.String;</net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>ActionId FieldSelectionType ActionType plugininstanceid plugintypeid </net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+			<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+			<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+			<plugininstanceid>cd1257d8-afc9-4678-aa92-2273b6bb2f9d</plugininstanceid>
+			<plugininstanceid-type>java.lang.String</plugininstanceid-type>
+			<plugintypeid>com.joaomgcd.autoinput.intent.IntentPerformAction</plugintypeid>
+			<plugintypeid-type>java.lang.String</plugintypeid-type>
+			</Vals>
+			</Bundle>
+			<Str sr="arg1" ve="3">com.joaomgcd.autoinput</Str>
+			<Str sr="arg2" ve="3">com.joaomgcd.autoinput.activity.ActivityConfigPerformAction</Str>
+			<Int sr="arg3" val="23"/>
+			</Action>
+			<Action sr="act47" ve="7">
+			<code>30</code>
+			<Int sr="arg0" val="0"/>
+			<Int sr="arg1" val="3"/>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			</Action>
+			<Action sr="act48" ve="7">
+			<code>1732635924</code>
+			<Bundle sr="arg0">
+			<Vals sr="val">
+			<ActionId>Smart Home</ActionId>
+			<ActionId-type>java.lang.String</ActionId-type>
+			<ActionType>16</ActionType>
+			<ActionType-type>java.lang.String</ActionType-type>
+			<EnableDisableAccessibilityService>&lt;null&gt;</EnableDisableAccessibilityService>
+			<EnableDisableAccessibilityService-type>java.lang.String</EnableDisableAccessibilityService-type>
+			<FieldSelectionType>0</FieldSelectionType>
+			<FieldSelectionType-type>java.lang.String</FieldSelectionType-type>
+			<IsFirstAction>false</IsFirstAction>
+			<IsFirstAction-type>java.lang.Boolean</IsFirstAction-type>
+			<IsTaskerAction>false</IsTaskerAction>
+			<IsTaskerAction-type>java.lang.Boolean</IsTaskerAction-type>
+			<NearbyText>&lt;null&gt;</NearbyText>
+			<NearbyText-type>java.lang.String</NearbyText-type>
+			<Password>&lt;null&gt;</Password>
+			<Password-type>java.lang.String</Password-type>
+			<RepeatInterval>&lt;null&gt;</RepeatInterval>
+			<RepeatInterval-type>java.lang.String</RepeatInterval-type>
+			<RepeatTimes>&lt;null&gt;</RepeatTimes>
+			<RepeatTimes-type>java.lang.String</RepeatTimes-type>
+			<StoredAction>&lt;null&gt;</StoredAction>
+			<StoredAction-type>java.lang.String</StoredAction-type>
+			<TextToWrite>&lt;null&gt;</TextToWrite>
+			<TextToWrite-type>java.lang.String</TextToWrite-type>
+			<com.twofortyfouram.locale.intent.extra.BLURB>Type: Text
+			Value: Smart Home
+			Action : Click</com.twofortyfouram.locale.intent.extra.BLURB>
+			<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES>&lt;StringArray sr=""&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;%err
+			Error Code
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;%errmsg
+			Error Message
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;&lt;/StringArray&gt;</net.dinglisch.android.tasker.RELEVANT_VARIABLES>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>[Ljava.lang.String;</net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>ActionId FieldSelectionType ActionType plugininstanceid plugintypeid </net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+			<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+			<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+			<plugininstanceid>3bdfb5ca-d90a-4b82-a794-12ba21b56f9a</plugininstanceid>
+			<plugininstanceid-type>java.lang.String</plugininstanceid-type>
+			<plugintypeid>com.joaomgcd.autoinput.intent.IntentPerformAction</plugintypeid>
+			<plugintypeid-type>java.lang.String</plugintypeid-type>
+			</Vals>
+			</Bundle>
+			<Str sr="arg1" ve="3">com.joaomgcd.autoinput</Str>
+			<Str sr="arg2" ve="3">com.joaomgcd.autoinput.activity.ActivityConfigPerformAction</Str>
+			<Int sr="arg3" val="23"/>
+			</Action>
+			<Action sr="act49" ve="7">
+			<code>30</code>
+			<Int sr="arg0" val="0"/>
+			<Int sr="arg1" val="3"/>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			</Action>
+			<Action sr="act5" ve="7">
+			<code>30</code>
+			<Int sr="arg0" val="0"/>
+			<Int sr="arg1" val="3"/>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			</Action>
+			<Action sr="act50" ve="7">
+			<code>1732635924</code>
+			<Bundle sr="arg0">
+			<Vals sr="val">
+			<ActionId>test plug</ActionId>
+			<ActionId-type>java.lang.String</ActionId-type>
+			<ActionType>16</ActionType>
+			<ActionType-type>java.lang.String</ActionType-type>
+			<EnableDisableAccessibilityService>&lt;null&gt;</EnableDisableAccessibilityService>
+			<EnableDisableAccessibilityService-type>java.lang.String</EnableDisableAccessibilityService-type>
+			<FieldSelectionType>0</FieldSelectionType>
+			<FieldSelectionType-type>java.lang.String</FieldSelectionType-type>
+			<IsFirstAction>false</IsFirstAction>
+			<IsFirstAction-type>java.lang.Boolean</IsFirstAction-type>
+			<IsTaskerAction>false</IsTaskerAction>
+			<IsTaskerAction-type>java.lang.Boolean</IsTaskerAction-type>
+			<NearbyText>&lt;null&gt;</NearbyText>
+			<NearbyText-type>java.lang.String</NearbyText-type>
+			<Password>&lt;null&gt;</Password>
+			<Password-type>java.lang.String</Password-type>
+			<RepeatInterval>&lt;null&gt;</RepeatInterval>
+			<RepeatInterval-type>java.lang.String</RepeatInterval-type>
+			<RepeatTimes>&lt;null&gt;</RepeatTimes>
+			<RepeatTimes-type>java.lang.String</RepeatTimes-type>
+			<StoredAction>&lt;null&gt;</StoredAction>
+			<StoredAction-type>java.lang.String</StoredAction-type>
+			<TextToWrite>&lt;null&gt;</TextToWrite>
+			<TextToWrite-type>java.lang.String</TextToWrite-type>
+			<com.twofortyfouram.locale.intent.extra.BLURB>Type: Text
+			Value: test plug
+			Action : Click</com.twofortyfouram.locale.intent.extra.BLURB>
+			<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES>&lt;StringArray sr=""&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;%err
+			Error Code
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;%errmsg
+			Error Message
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;&lt;/StringArray&gt;</net.dinglisch.android.tasker.RELEVANT_VARIABLES>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>[Ljava.lang.String;</net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>ActionId FieldSelectionType ActionType plugininstanceid plugintypeid </net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+			<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+			<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+			<plugininstanceid>452c6e36-bcae-4e88-8a95-493264850dfc</plugininstanceid>
+			<plugininstanceid-type>java.lang.String</plugininstanceid-type>
+			<plugintypeid>com.joaomgcd.autoinput.intent.IntentPerformAction</plugintypeid>
+			<plugintypeid-type>java.lang.String</plugintypeid-type>
+			</Vals>
+			</Bundle>
+			<Str sr="arg1" ve="3">com.joaomgcd.autoinput</Str>
+			<Str sr="arg2" ve="3">com.joaomgcd.autoinput.activity.ActivityConfigPerformAction</Str>
+			<Int sr="arg3" val="23"/>
+			</Action>
+			<Action sr="act51" ve="7">
+			<code>30</code>
+			<Int sr="arg0" val="0"/>
+			<Int sr="arg1" val="3"/>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			</Action>
+			<Action sr="act52" ve="7">
+			<code>1732635924</code>
+			<Bundle sr="arg0">
+			<Vals sr="val">
+			<ActionId>on</ActionId>
+			<ActionId-type>java.lang.String</ActionId-type>
+			<ActionType>16</ActionType>
+			<ActionType-type>java.lang.String</ActionType-type>
+			<EnableDisableAccessibilityService>&lt;null&gt;</EnableDisableAccessibilityService>
+			<EnableDisableAccessibilityService-type>java.lang.String</EnableDisableAccessibilityService-type>
+			<FieldSelectionType>0</FieldSelectionType>
+			<FieldSelectionType-type>java.lang.String</FieldSelectionType-type>
+			<IsFirstAction>false</IsFirstAction>
+			<IsFirstAction-type>java.lang.Boolean</IsFirstAction-type>
+			<IsTaskerAction>false</IsTaskerAction>
+			<IsTaskerAction-type>java.lang.Boolean</IsTaskerAction-type>
+			<NearbyText>&lt;null&gt;</NearbyText>
+			<NearbyText-type>java.lang.String</NearbyText-type>
+			<Password>&lt;null&gt;</Password>
+			<Password-type>java.lang.String</Password-type>
+			<RepeatInterval>&lt;null&gt;</RepeatInterval>
+			<RepeatInterval-type>java.lang.String</RepeatInterval-type>
+			<RepeatTimes>&lt;null&gt;</RepeatTimes>
+			<RepeatTimes-type>java.lang.String</RepeatTimes-type>
+			<StoredAction>&lt;null&gt;</StoredAction>
+			<StoredAction-type>java.lang.String</StoredAction-type>
+			<TextToWrite>&lt;null&gt;</TextToWrite>
+			<TextToWrite-type>java.lang.String</TextToWrite-type>
+			<com.twofortyfouram.locale.intent.extra.BLURB>Type: Text
+			Value: on
+			Action : Click</com.twofortyfouram.locale.intent.extra.BLURB>
+			<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES>&lt;StringArray sr=""&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;%err
+			Error Code
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;%errmsg
+			Error Message
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;&lt;/StringArray&gt;</net.dinglisch.android.tasker.RELEVANT_VARIABLES>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>[Ljava.lang.String;</net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>ActionId FieldSelectionType ActionType plugininstanceid plugintypeid </net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+			<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+			<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+			<plugininstanceid>023af29a-9c8b-42d6-aed1-44eea463927d</plugininstanceid>
+			<plugininstanceid-type>java.lang.String</plugininstanceid-type>
+			<plugintypeid>com.joaomgcd.autoinput.intent.IntentPerformAction</plugintypeid>
+			<plugintypeid-type>java.lang.String</plugintypeid-type>
+			</Vals>
+			</Bundle>
+			<Str sr="arg1" ve="3">com.joaomgcd.autoinput</Str>
+			<Str sr="arg2" ve="3">com.joaomgcd.autoinput.activity.ActivityConfigPerformAction</Str>
+			<Int sr="arg3" val="23"/>
+			</Action>
+			<Action sr="act53" ve="7">
+			<code>30</code>
+			<Int sr="arg0" val="0"/>
+			<Int sr="arg1" val="3"/>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			</Action>
+			<Action sr="act54" ve="7">
+			<code>1732635924</code>
+			<Bundle sr="arg0">
+			<Vals sr="val">
+			<ActionId>Next</ActionId>
+			<ActionId-type>java.lang.String</ActionId-type>
+			<ActionType>16</ActionType>
+			<ActionType-type>java.lang.String</ActionType-type>
+			<EnableDisableAccessibilityService>&lt;null&gt;</EnableDisableAccessibilityService>
+			<EnableDisableAccessibilityService-type>java.lang.String</EnableDisableAccessibilityService-type>
+			<FieldSelectionType>0</FieldSelectionType>
+			<FieldSelectionType-type>java.lang.String</FieldSelectionType-type>
+			<IsFirstAction>false</IsFirstAction>
+			<IsFirstAction-type>java.lang.Boolean</IsFirstAction-type>
+			<IsTaskerAction>false</IsTaskerAction>
+			<IsTaskerAction-type>java.lang.Boolean</IsTaskerAction-type>
+			<NearbyText>&lt;null&gt;</NearbyText>
+			<NearbyText-type>java.lang.String</NearbyText-type>
+			<Password>&lt;null&gt;</Password>
+			<Password-type>java.lang.String</Password-type>
+			<RepeatInterval>&lt;null&gt;</RepeatInterval>
+			<RepeatInterval-type>java.lang.String</RepeatInterval-type>
+			<RepeatTimes>&lt;null&gt;</RepeatTimes>
+			<RepeatTimes-type>java.lang.String</RepeatTimes-type>
+			<StoredAction>&lt;null&gt;</StoredAction>
+			<StoredAction-type>java.lang.String</StoredAction-type>
+			<TextToWrite>&lt;null&gt;</TextToWrite>
+			<TextToWrite-type>java.lang.String</TextToWrite-type>
+			<com.twofortyfouram.locale.intent.extra.BLURB>Type: Text
+			Value: Next
+			Action : Click</com.twofortyfouram.locale.intent.extra.BLURB>
+			<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES>&lt;StringArray sr=""&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;%err
+			Error Code
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;%errmsg
+			Error Message
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;&lt;/StringArray&gt;</net.dinglisch.android.tasker.RELEVANT_VARIABLES>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>[Ljava.lang.String;</net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>ActionId FieldSelectionType ActionType plugininstanceid plugintypeid </net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+			<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+			<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+			<plugininstanceid>3b1d384e-d7e6-49ac-9888-f06632848623</plugininstanceid>
+			<plugininstanceid-type>java.lang.String</plugininstanceid-type>
+			<plugintypeid>com.joaomgcd.autoinput.intent.IntentPerformAction</plugintypeid>
+			<plugintypeid-type>java.lang.String</plugintypeid-type>
+			</Vals>
+			</Bundle>
+			<Str sr="arg1" ve="3">com.joaomgcd.autoinput</Str>
+			<Str sr="arg2" ve="3">com.joaomgcd.autoinput.activity.ActivityConfigPerformAction</Str>
+			<Int sr="arg3" val="23"/>
+			</Action>
+			<Action sr="act55" ve="7">
+			<code>30</code>
+			<Int sr="arg0" val="0"/>
+			<Int sr="arg1" val="3"/>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			</Action>
+			<Action sr="act56" ve="7">
+			<code>1732635924</code>
+			<Bundle sr="arg0">
+			<Vals sr="val">
+			<ActionId>Save</ActionId>
+			<ActionId-type>java.lang.String</ActionId-type>
+			<ActionType>16</ActionType>
+			<ActionType-type>java.lang.String</ActionType-type>
+			<EnableDisableAccessibilityService>&lt;null&gt;</EnableDisableAccessibilityService>
+			<EnableDisableAccessibilityService-type>java.lang.String</EnableDisableAccessibilityService-type>
+			<FieldSelectionType>0</FieldSelectionType>
+			<FieldSelectionType-type>java.lang.String</FieldSelectionType-type>
+			<IsFirstAction>false</IsFirstAction>
+			<IsFirstAction-type>java.lang.Boolean</IsFirstAction-type>
+			<IsTaskerAction>false</IsTaskerAction>
+			<IsTaskerAction-type>java.lang.Boolean</IsTaskerAction-type>
+			<NearbyText>&lt;null&gt;</NearbyText>
+			<NearbyText-type>java.lang.String</NearbyText-type>
+			<Password>&lt;null&gt;</Password>
+			<Password-type>java.lang.String</Password-type>
+			<RepeatInterval>&lt;null&gt;</RepeatInterval>
+			<RepeatInterval-type>java.lang.String</RepeatInterval-type>
+			<RepeatTimes>&lt;null&gt;</RepeatTimes>
+			<RepeatTimes-type>java.lang.String</RepeatTimes-type>
+			<StoredAction>&lt;null&gt;</StoredAction>
+			<StoredAction-type>java.lang.String</StoredAction-type>
+			<TextToWrite>&lt;null&gt;</TextToWrite>
+			<TextToWrite-type>java.lang.String</TextToWrite-type>
+			<com.twofortyfouram.locale.intent.extra.BLURB>Type: Text
+			Value: Save
+			Action : Click</com.twofortyfouram.locale.intent.extra.BLURB>
+			<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES>&lt;StringArray sr=""&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;%err
+			Error Code
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;%errmsg
+			Error Message
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;&lt;/StringArray&gt;</net.dinglisch.android.tasker.RELEVANT_VARIABLES>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>[Ljava.lang.String;</net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>ActionId FieldSelectionType ActionType plugininstanceid plugintypeid </net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+			<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+			<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+			<plugininstanceid>6fce8d70-f471-42d2-b1f6-91f1afb14617</plugininstanceid>
+			<plugininstanceid-type>java.lang.String</plugininstanceid-type>
+			<plugintypeid>com.joaomgcd.autoinput.intent.IntentPerformAction</plugintypeid>
+			<plugintypeid-type>java.lang.String</plugintypeid-type>
+			</Vals>
+			</Bundle>
+			<Str sr="arg1" ve="3">com.joaomgcd.autoinput</Str>
+			<Str sr="arg2" ve="3">com.joaomgcd.autoinput.activity.ActivityConfigPerformAction</Str>
+			<Int sr="arg3" val="23"/>
+			</Action>
+			<Action sr="act6" ve="7">
+			<code>1732635924</code>
+			<Bundle sr="arg0">
+			<Vals sr="val">
+			<ActionId>Add New</ActionId>
+			<ActionId-type>java.lang.String</ActionId-type>
+			<ActionType>16</ActionType>
+			<ActionType-type>java.lang.String</ActionType-type>
+			<EnableDisableAccessibilityService>&lt;null&gt;</EnableDisableAccessibilityService>
+			<EnableDisableAccessibilityService-type>java.lang.String</EnableDisableAccessibilityService-type>
+			<FieldSelectionType>0</FieldSelectionType>
+			<FieldSelectionType-type>java.lang.String</FieldSelectionType-type>
+			<IsFirstAction>false</IsFirstAction>
+			<IsFirstAction-type>java.lang.Boolean</IsFirstAction-type>
+			<IsTaskerAction>false</IsTaskerAction>
+			<IsTaskerAction-type>java.lang.Boolean</IsTaskerAction-type>
+			<NearbyText>&lt;null&gt;</NearbyText>
+			<NearbyText-type>java.lang.String</NearbyText-type>
+			<Password>&lt;null&gt;</Password>
+			<Password-type>java.lang.String</Password-type>
+			<RepeatInterval>&lt;null&gt;</RepeatInterval>
+			<RepeatInterval-type>java.lang.String</RepeatInterval-type>
+			<RepeatTimes>&lt;null&gt;</RepeatTimes>
+			<RepeatTimes-type>java.lang.String</RepeatTimes-type>
+			<StoredAction>&lt;null&gt;</StoredAction>
+			<StoredAction-type>java.lang.String</StoredAction-type>
+			<TextToWrite>&lt;null&gt;</TextToWrite>
+			<TextToWrite-type>java.lang.String</TextToWrite-type>
+			<com.twofortyfouram.locale.intent.extra.BLURB>Type: Text
+			Value: Add New
+			Action : Click</com.twofortyfouram.locale.intent.extra.BLURB>
+			<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES>&lt;StringArray sr=""&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;%err
+			Error Code
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;%errmsg
+			Error Message
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;&lt;/StringArray&gt;</net.dinglisch.android.tasker.RELEVANT_VARIABLES>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>[Ljava.lang.String;</net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>ActionId FieldSelectionType ActionType plugininstanceid plugintypeid </net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+			<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+			<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+			<plugininstanceid>c205e5d1-1335-41dc-b536-1ce82ed77c0d</plugininstanceid>
+			<plugininstanceid-type>java.lang.String</plugininstanceid-type>
+			<plugintypeid>com.joaomgcd.autoinput.intent.IntentPerformAction</plugintypeid>
+			<plugintypeid-type>java.lang.String</plugintypeid-type>
+			</Vals>
+			</Bundle>
+			<Str sr="arg1" ve="3">com.joaomgcd.autoinput</Str>
+			<Str sr="arg2" ve="3">com.joaomgcd.autoinput.activity.ActivityConfigPerformAction</Str>
+			<Int sr="arg3" val="23"/>
+			</Action>
+			<Action sr="act7" ve="7">
+			<code>30</code>
+			<Int sr="arg0" val="0"/>
+			<Int sr="arg1" val="3"/>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			</Action>
+			<Action sr="act8" ve="7">
+			<code>1732635924</code>
+			<Bundle sr="arg0">
+			<Vals sr="val">
+			<ActionId>Enter routine name</ActionId>
+			<ActionId-type>java.lang.String</ActionId-type>
+			<ActionType>16</ActionType>
+			<ActionType-type>java.lang.String</ActionType-type>
+			<EnableDisableAccessibilityService>&lt;null&gt;</EnableDisableAccessibilityService>
+			<EnableDisableAccessibilityService-type>java.lang.String</EnableDisableAccessibilityService-type>
+			<FieldSelectionType>0</FieldSelectionType>
+			<FieldSelectionType-type>java.lang.String</FieldSelectionType-type>
+			<IsFirstAction>false</IsFirstAction>
+			<IsFirstAction-type>java.lang.Boolean</IsFirstAction-type>
+			<IsTaskerAction>false</IsTaskerAction>
+			<IsTaskerAction-type>java.lang.Boolean</IsTaskerAction-type>
+			<NearbyText>&lt;null&gt;</NearbyText>
+			<NearbyText-type>java.lang.String</NearbyText-type>
+			<Password>&lt;null&gt;</Password>
+			<Password-type>java.lang.String</Password-type>
+			<RepeatInterval>&lt;null&gt;</RepeatInterval>
+			<RepeatInterval-type>java.lang.String</RepeatInterval-type>
+			<RepeatTimes>&lt;null&gt;</RepeatTimes>
+			<RepeatTimes-type>java.lang.String</RepeatTimes-type>
+			<StoredAction>&lt;null&gt;</StoredAction>
+			<StoredAction-type>java.lang.String</StoredAction-type>
+			<TextToWrite>&lt;null&gt;</TextToWrite>
+			<TextToWrite-type>java.lang.String</TextToWrite-type>
+			<com.twofortyfouram.locale.intent.extra.BLURB>Type: Text
+			Value: Enter routine name
+			Action : Click</com.twofortyfouram.locale.intent.extra.BLURB>
+			<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES>&lt;StringArray sr=""&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;%err
+			Error Code
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;%errmsg
+			Error Message
+			Only available if you select &amp;lt;b&amp;gt;Continue Task After Error&amp;lt;/b&amp;gt; and the action ends in error&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;&lt;/StringArray&gt;</net.dinglisch.android.tasker.RELEVANT_VARIABLES>
+			<net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>[Ljava.lang.String;</net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>ActionId FieldSelectionType ActionType plugininstanceid plugintypeid </net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+			<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+			<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+			<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+			<plugininstanceid>435365d5-933d-4f58-afc7-bb5c52ed8bec</plugininstanceid>
+			<plugininstanceid-type>java.lang.String</plugininstanceid-type>
+			<plugintypeid>com.joaomgcd.autoinput.intent.IntentPerformAction</plugintypeid>
+			<plugintypeid-type>java.lang.String</plugintypeid-type>
+			</Vals>
+			</Bundle>
+			<Str sr="arg1" ve="3">com.joaomgcd.autoinput</Str>
+			<Str sr="arg2" ve="3">com.joaomgcd.autoinput.activity.ActivityConfigPerformAction</Str>
+			<Int sr="arg3" val="23"/>
+			</Action>
+			<Action sr="act9" ve="7">
+			<code>30</code>
+			<Int sr="arg0" val="0"/>
+			<Int sr="arg1" val="3"/>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			</Action>
+			</Task>
+			</TaskerData>`
+		}
+			finished= finished &&processCheckBoxes(frame.parts[i]);
+		}
+		else if(partType=="frameName")
+		{
+			if(isFinished(frames.get(frame.parts[i].name)))
+				finished= finished &&true;
+			else
+			{
+				askQuestions(frame.parts[i].name,false);
+				finished=finished &&false;
+			}
+		}
+		else console.log("error: bad partType ",partType);
+		if(!finished)
+			return false;
+	}
+	return finished;
+
+
+}
+
+
+function processAlternatives(subframe)
+{
+	console.log("alternatives");
+	// Get the modal
+	if ((subframe.choice!="")&&(subframe.finished))
+		return true; //no need to keep asking
+	var modal = document.getElementById("myModal");
+	var s='<form id="foo">' ;
+	for(var i=0;i<subframe.choices.length;i++)
+	{
+		var opt=subframe.choices[i];
+	     s=s+opt.question+'<input type="radio" value="'+opt.subframe+'" name="alt">';
+	 }
+	s=s+"</form>";
+	console.log("s is {"+s+"}");
+	var innerModal=document.getElementById("innerModal");
+	innerModal.innerHTML=s;
+	modal.style.display = "block";
+
+
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName("close")[0];
+
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function(){closeRadio(subframe);}
+return false;
+}
+function closeRadio(subframe)
+{
+	var modal = document.getElementById("myModal");
+  modal.style.display = "none";
+  //read the checked value
+  subframe.choice=document.getElementById("foo")["alt"].value;
+
+
+  	setTimeout(function(){ askQuestions("top",true); }, 10);
+}
+function processSimpleSlot(frame,slot)
+{
+	console.log("simple slot");
+	if (slot.value!="")
+	{
+		console.log("simple slot resolved");
+		return true; //finished
+	}
+	// Get the modal
+	console.log("in simple slot");
+	var modal = document.getElementById("myModal");
+	var s='<form id="foo">&nbsp;';
+	s=s+slot.question+'<input type="text" id="filler" value="   ">';
+	s=s+"</form>";
+	var innerModal=document.getElementById("innerModal");
+	innerModal.innerHTML=s;
+	modal.style.display = "block";
+
+
+
+	// Get the <span> element that closes the modal
+	var span = document.getElementsByClassName("close")[0];
+
+
+	// When the user clicks on <span> (x), close the modal
+	span.onclick = function()
+	{
+  		modal.style.display = "none";
+  		//read the value
+  		slot.value=document.getElementById("filler").value;
+  		console.log("simple slot set");
+  		setTimeout(function(){ askQuestions("top",true); }, 10);
+
+	}
+	return false; //not finished
+}
+function processCheckBoxes(slot)
+{
+	console.log("checkboxes slot value {",slot.value,"}");
+	if (slot.value!="")
+		return true; //finished
+	// Get the modal
+	var modal = document.getElementById("myModal");
+	var s='<form id="foo">&nbsp;';
+	for(var i=0;i<slot.options.length;i++)
+		s=s+slot.options[i].choice+"<input type='checkbox' value='"+slot.options[i].choice+"'>&nbsp;";
+	s=s+"</form>";
+	var innerModal=document.getElementById("innerModal");
+	innerModal.innerHTML=s;
+	modal.style.display = "block";
+
+
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName("close")[0];
+
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function(){closeCheckbox(slot);}
+return false;
+
+}
+function closeCheckbox(slot)
+{
+	var modal = document.getElementById("myModal");
+  modal.style.display = "none";
+  //read the checked values
+  var array = []
+	var checkboxes = document.querySelectorAll('input[type=checkbox]:checked')
+	var s="";
+
+	for (var i = 0; i < checkboxes.length; i++)
+	{
+  		array.push(checkboxes[i].value);
+  		s=s+","+checkboxes[i].value;
+  	}
+  	//document.getElementById("output").innerHTML=s;
+  	if(checkboxes.length==1)
+  		slot.value=array[0];
+  	else slot.value="boxes"; //temporary to test close
+  	/* need to move this into askQuestions
+  	if (checkboxes.length>1) //also need to handle multiple options
+  	{
+  		if (slot.cloneQuestion!="")
+  			if(confirm(slot.cloneQuestion))
+  				copyClone(slot)
+  			splitClone(slot);
+  	}
+  	*/
+  	console.log("checkboxes read set ",slot.value);
+  	setTimeout(function(){ askQuestions("top",true); }, 10);
+ }
+
+function copyClone(slot)
+{
+	console.log("copyclone stub");
+}
+function splitClone(slot)
+{
+	console.log("spltclone stub");
+}
+
+
+
+
+function generateCommands(frameName)
+{
+	console.log("generating commands for ",frameName);
+	var frame=frames.get(frameName);
+	var s=scripts.get(frameName); //name of frame is name of script
+	var splits=s.split("^");
+	var result=[];
+	for(var i=0;i<splits.length;i++)
+	{
+		result += processSplit(frame,splits[i])
+	}
+	result=replaceBreaks(result);
+	//document.getElementById("output").innerHTML+=result;
+	return result;
+}
+function replaceBreaks(s)
+{
+	return s.replace(/\n/g,"<br>");
+}
+function processSplit(frame,split)
+{
+	console.log("split: {",split,"}");
+	if(split.startsWith("slotval"))
+		return findSlotValue(frame, split.slice(8));
+	if(split.startsWith("subframeScript"))
+		return generateCommands(split.slice(15));
+	if(split.startsWith("chosen"))
+		return generateCommands(findChosen(split.slice(7)));
+	return split;
+}
+function findSlotValue(frame,name) //add check that it is a slot
+{
+	for(var i=0;i<frame.parts.length;i++)
+		if (frame.parts[i].name==name)
+			return frame.parts[i].value;
+	return "error: slot not found";
+}
+function findChosen(name)
+{
+	return frames.get(name).choice;
+}
+
+function saveTextAsFile()
+{
+    var textToSave = routine_name+hour_val+min_val+merediem_val+day_value;
+    var textToSaveAsBlob = new Blob([textToSave], {type:"text/plain"});
+    var textToSaveAsURL = window.URL.createObjectURL(textToSaveAsBlob);
+    var fileNameToSaveAs = document.getElementById("inputFileNameToSaveAs").value;
+
+    var downloadLink = document.createElement("a");
+    downloadLink.download = fileNameToSaveAs;
+    downloadLink.innerHTML = "Download File";
+    downloadLink.href = textToSaveAsURL;
+    downloadLink.onclick = destroyClickedElement;
+    downloadLink.style.display = "none";
+    document.body.appendChild(downloadLink);
+
+    downloadLink.click();
+}
+function destroyClickedElement(event)
+{
+    document.body.removeChild(event.target);
+}
+
+//-->
+</script>
+<input  type="button" value="run" id="start" onclick="askQuestions('top',true);">
+<div id="output">
+	</div>
+<!-- The Modal -->
+<div id="myModal" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    <span class="close">OK</span>
+    <div id="innerModal"></div>
+  </div>
+
+</div>
+
+</body>
+</html>
