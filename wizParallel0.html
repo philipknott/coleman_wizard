@@ -1,0 +1,463 @@
+<html>
+<head>
+		<title>Automation Wizard</title>
+		<style>
+body {font-family: Arial, Helvetica, sans-serif;}
+
+/* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 50%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+}
+
+/* The Close Button was float: right;*/
+.close {
+  color: #aaaaaa;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+<script src="frames5.js"></script>
+<script src="gencommand.js"></script>
+<script src="boundcopy.js"></script>
+<script src="layoutQuestions7.js"></script>
+<script language="JavaScript" type="text/javascript">
+<!--
+//replace question asking process with one that lays all
+//questions out on a virtual plane
+//then allows user to answer in any order
+//use some kind of highlighting to indicate what answers are currently needed
+//aim: use same frames data structure for this
+
+var topLevel=[];
+topLevel[0]=topX;
+
+function run()
+{
+	layout(topLevel);
+	//document.getElementById("firstGroup").addEventListener("click", handleClick);
+}
+
+
+function askQuestionsTop()
+{
+	//alert("at top level");
+	console.log("name ",topLevel[0].name);
+	console.log("name ",top.name);
+	for(var i=0;i<topLevel.length;i++)
+		if(!topLevel[i].finished)
+		{
+			askQuestions(topLevel[i]);
+			return;
+		}
+	cloneAndGenerateCommands();
+}
+function cloneAndGenerateCommands()
+{
+//stub
+console.log("finished w questions");
+//return;
+//bindTopLevel() then
+//bindTopLevel();
+//traverseBoundVersions() then
+traverseTop();
+//generateCommandsTopLevel()
+generateCommandsTopLevel();
+
+
+	//stub for test
+	//document.getElementById("output").innerHTML+=generateCommands(topLevel[0].name);
+}
+
+
+function askQuestions(frame)
+{
+	//console.log("{"+frameName+"}");
+	console.log("start asking questions for "+frame.name);
+	//alert("start asking questions for "+frameName);
+	var finished=true;
+	if(!isFinished(frame))
+	{
+	
+		if(frame.type=="compositeFrame")
+			finished=processCompositeFrame(frame);
+		else if (frame.type=="alternativesFrame")
+			finished=processAlternativesFrame(frame)
+		else if (frame.type=="leaf")
+		{
+			processLeaf(frame);
+			finished=true;
+		}
+	}
+
+	console.log(frame.name, " finished? ",finished);
+	if(finished)
+	{
+		console.log(frame.name," is finished");
+		
+		frame.finished=true;
+		setTimeout(function(){ askQuestionsTop(); }, 10);
+	}
+}
+function isFinished(frame)
+{
+	if(frame.type=="leaf")
+		return true;
+	return frame.finished;
+}
+function processLeaf(frame)
+{
+	console.log("processing leaf ",frame.name);
+}
+function processAlternativesFrame(frame)
+{
+	console.log("processing alternative ",frame.name," choice ",frame.choice);
+	console.log("frame is ",frame);
+	if (frame.choice!="")
+	{
+		//if(!frame.finished)
+		if(!isFinished(frame.choice))
+		{
+			askQuestions(frame.choice);
+			return false;
+		}
+		frame.finished=true;
+		return true;
+	}
+	else 
+	{
+		return processAlternatives(frame);
+	}
+}
+function processCompositeFrame(frame)
+{
+	console.log("composite frame ",frame.name);
+	var finished=true;
+	for(var i=0;i<frame.parts.length;i++)
+	{
+		var part=frame.parts[i];
+		var partType=part.type;
+		if(partType=="simpleSlot")
+		{
+			finished=finished && processSimpleSlot(part);
+		}
+		else if(partType=="checkboxesSlot")
+		{
+			finished= finished &&processCheckBoxes(part);
+		}
+		else if(partType=="subFrame")
+		{
+			//if(isFinished(frames.get(frame.parts[i].name)))
+			if(isFinished(part.subframe))
+				finished= finished &&true;
+			else
+			{
+				askQuestions(part.subframe);
+				finished=false;
+			}
+		}
+		else if(partType="more")
+		{
+			if (part.finished)
+				finished=finished&&true;
+			else
+			{
+				processMore(frame,i, part); //send i so can insert clone in right place
+				finished=false;
+			}
+		}
+		else console.log("error: bad partType ",partType);
+		if(!finished)
+			return false;
+	}
+	return finished;
+
+
+}
+function processMore(frame,index,part)
+{
+	//var sub=blankClone(part.subframe);
+
+	console.log("more; finished ",part.finished);
+	// Get the modal
+	var modal = document.getElementById("myModal");
+	var s='<form id="foo">'+part.question+
+		'yes <input type="radio" value="true" name="alt">'+
+		'no <input type="radio" value="false" name="alt" checked><form id="foo">';
+		
+	console.log("s is {"+s+"}");
+	var innerModal=document.getElementById("innerModal");
+	innerModal.innerHTML=s;
+	modal.style.display = "block";
+
+
+
+	var close=document.getElementById("close");
+
+
+	close.onclick = function(){closeMoreRadio(frame, index, part);}
+	//setUpEnter();
+	return false;
+}
+function closeMoreRadio(frame,index,part)
+{
+	console.log("in closeMoreRadio");
+	var modal = document.getElementById("myModal");
+  modal.style.display = "none";
+  //read the checked value
+  var opt=document.getElementById("foo")["alt"].value;
+  console.log("more opt is ",opt);
+  if (opt=="true")
+  {
+  	console.log("opt is true");
+  	insertClone(frame,index,part);
+  	console.log("frame after insertClone ",frame);
+  }
+  else 
+  {
+  	console.log("opt is false");
+  	part.finished=true;
+  }
+
+  
+  	
+  	setTimeout(function(){ askQuestionsTop(); }, 10);
+}
+function insertClone(frame,index,part)
+{
+	console.log("inserting clone of ",frame.name);
+	var sub={type:"subFrame", subframe:blankClone(part.subframe)};
+	frame.parts.splice(index,0,sub);
+}
+
+
+	 
+function processAlternatives(subframe)
+{
+	console.log("alternatives");
+	// Get the modal
+	if ((subframe.choice!="")&&(subframe.finished))
+		return true; //no need to keep asking
+	var modal = document.getElementById("myModal");
+	var s='<form id="foo">' ;
+	for(var i=0;i<subframe.choices.length;i++)
+	{
+		var opt=subframe.choices[i];
+	     s=s+opt.question+'<input type="radio" value="'+i+'" name="alt">';
+	 }
+	s=s+"</form>";
+	console.log("s is {"+s+"}");
+	var innerModal=document.getElementById("innerModal");
+	innerModal.innerHTML=s;
+	modal.style.display = "block";
+
+
+
+
+	var close=document.getElementById("close");
+
+
+	close.onclick = function(){closeAltRadio(subframe);}
+	//setUpEnter();
+	return false;
+}
+function closeAltRadio(subframe)
+{
+	var modal = document.getElementById("myModal");
+  modal.style.display = "none";
+  //read the checked value
+  subframe.choice=subframe.choices[document.getElementById("foo")["alt"].value].subframe;
+  
+  	
+  	setTimeout(function(){ askQuestionsTop(); }, 10);
+}
+function setUpEnter()
+{
+	// Get the input form
+	var input = document.getElementById("foo");
+
+	// change submit action
+	input.addEventListener("submit", function(event) 
+	{
+  		// Number 13 is the "Enter" key on the keyboard
+  		//if (event.keyCode === 13) {
+    	// Cancel the default action, if needed
+    	event.preventDefault();
+    	// Trigger the button element with a click
+    	console.log("responding to enter");
+    	document.getElementById("close").click();
+  
+  		//}
+	});
+}
+function processSimpleSlot(slot)
+{
+	console.log("simple slot");
+	if (slot.value!="")
+	{
+		console.log("simple slot resolved");
+		return true; //finished
+	}
+	// Get the modal
+	console.log("in simple slot");
+	var modal = document.getElementById("myModal");
+	var s='<form id="foo">&nbsp;';
+	s=s+slot.question+'<input type="text" id="filler" value="   ">';
+	s=s+"</form>";
+	var innerModal=document.getElementById("innerModal");
+	innerModal.innerHTML=s;
+
+	modal.style.display = "block";
+    document.getElementById("filler").focus();
+
+
+	// Get the <span> element that closes the modal
+	//var span = document.getElementsByClassName("close")[0];
+	var close=document.getElementById("close");
+
+
+	// When the user clicks on <span> (x), close the modal
+	close.onclick = function()
+	{
+  		modal.style.display = "none";
+  		//read the value
+  		slot.value=document.getElementById("filler").value;
+  		console.log("simple slot set");
+  		setTimeout(function(){ askQuestionsTop(); }, 10);
+  
+	}
+	setUpEnter();
+	return false; //not finished
+}
+function processCheckBoxes(slot)
+{
+	console.log("checkboxes slot value {",slot.value,"}");
+	if (slot.value.length!=0)
+		return true; //finished
+	// Get the modal
+	var modal = document.getElementById("myModal");
+	var s='<form id="foo">&nbsp;';
+	for(var i=0;i<slot.options.length;i++)
+		s=s+slot.options[i].choice+"<input type='checkbox' value='"+i+"'>&nbsp;";
+	s=s+"</form>";
+	var innerModal=document.getElementById("innerModal");
+	innerModal.innerHTML=s;
+	modal.style.display = "block";
+
+
+
+// Get the <span> element that closes the modal
+//var span = document.getElementsByClassName("close")[0];
+var close=document.getElementById("close");
+
+// When the user clicks button, close the modal
+close.onclick = function(){closeCheckbox(slot);}
+//setUpEnter();
+return false; 
+
+}
+function closeCheckbox(slot)
+{
+	var modal = document.getElementById("myModal");
+  modal.style.display = "none";
+  //read the checked values
+  var array = []
+	var checkboxes = document.querySelectorAll('input[type=checkbox]:checked');
+	console.log("checkboxes[0].value ",checkboxes[0].value);
+	var s="";
+
+	for (var i = 0; i < checkboxes.length; i++) 
+	{
+		console.log("ith item ",checkboxes[i]);
+		var option=slot.options[checkboxes[i].value];
+		console.log("corresponding option ",option);
+		if (option.type=="simple")
+		{
+  			array.push(option.choice);
+  			s=s+","+option.choice;
+  		}
+  		else if(option.type=="multiple")
+  		{
+  			for(var i=0;i<option.values.length;i++)
+  			{
+  				array.push(option.values[i]);
+  				s=s+","+option.values[i];
+  			}
+  		}
+  		else console.log("bad option in checkboxesSlot");
+  	}
+  	
+  	slot.value=array;
+  	
+  	console.log("checkboxes read set ",slot.value);
+  	setTimeout(function(){ askQuestionsTop(); }, 10);
+ }
+/*
+function copyClone(slot)
+{
+	console.log("copyclone stub");
+}
+function splitClone(slot)
+{
+	console.log("spltclone stub");
+}
+*/
+
+
+
+
+
+
+
+//-->
+</script>
+<svg height="350" width="900">
+ 
+       <g id="firstGroup">
+
+  </g>
+</svg>
+<input  type="button" value="run" id="start" onclick="run();">
+<div id="output">
+	</div>
+<!-- The Modal -->
+<div id="myModal" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    
+    <div id="innerModal"></div>
+    <input  type="button" value="OK" id="close">
+  </div>
+
+</div>
+
+</body>
+</html>
