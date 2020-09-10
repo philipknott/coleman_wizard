@@ -1,8 +1,6 @@
 //this version adds "more" blocks for in-question cloning
 //extending spoken message stub
 
-// here's a random comment for testing...
-
 var redSubframe=
 {
 	name:"red",
