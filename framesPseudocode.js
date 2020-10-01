@@ -41,7 +41,7 @@ var spokenSubframe=
 	{
 		type:"simpleSlot",
 		name: "message",
-		question: "",
+		question: "Text",
 		value:""
 	}
 	]
@@ -191,58 +191,40 @@ console.log("top name is ",topX.name);
 //use markdown philosophy for scripts: plan text escaping with ^ 
 var scripts=new Map();
 scripts.set("top",
-`select +       
-enter routine name
-select next
-select + next to when this happens
-select schedule
-select at time
-set ^slotval hour^ on dial
-set ^slotval minute^ on dial
-select ok
-select repeat
-select ^slotval days^
-select next
-select add action
+`
+set hour ^slotval hour^ 
+set minute ^slotval minute^ 
+set days ^slotval days^
 ^parts^
-select save
-select next
-select save
 `);
 scripts.set("action","^chosen action^");
 scripts.set("lamp",
-`select lights 
+`
 select color lamp
-select next
 ^chosen lamp^
 `);
 scripts.set("color",
-`select set color
-select color
-
-^chosen color^
+`
+set color ^chosen color^
 `);
 scripts.set("on-off",
-`select power
-
-^chosen on-off^
+`
+set power ^chosen on-off^
 `);
 scripts.set("turnOn",
-	`select next`);
+	`on`);
 scripts.set("turnOff",
-	`swipe button
-	select next`);
+	`off`);
 scripts.set("red",
-	`action to select red`);
+	`red`);
 scripts.set("blue",
-	`actions to select blue`);
+	`blue`);
 scripts.set("yellow",
-	`action to select yellow`);
+	`yellow`);
 scripts.set("green",
-	`actions to select green`);
+	`green`);
 scripts.set("spoken",
-	`action for spoken prompt
-	^slotval message^
+	`speak ^slotval message^
 	`);
 
 

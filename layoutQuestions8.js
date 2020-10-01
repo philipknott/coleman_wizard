@@ -32,20 +32,27 @@
 //  svg clicking working; can identify box clicked
 //  note some bug affecting "weekdays"
 //need to move to widgets (eg radio buttons) in boxes
+//put label and value in boxes... for buttons value is the state indicator
 const BOXHEIGHT=40;
 const BOXWIDTH=100;
 const TEXTHT=10;
 const GridSize=10;
-var boxes=[];
+var boxes=[];  //these arrays are used to store info about the spaces in the grid layout
 var slots=[];
+var vals=[];
+var index=[]; //used to keep track of radio buttons and check boxes
 for(var i=0;i<GridSize;i++)
 {
 	boxes[i]=[];
 	slots[i]=[];
+	vals[i]=[];
+	index[i]=[];
 	for(var j=0;j<GridSize;j++)
 	{
 		boxes[i][j]="";
 		slots[i][j]=0;
+		vals[i][j]="";
+		index[i][j]=0;
 	}
 }
 function layout(t)
@@ -71,7 +78,7 @@ function layoutCompositeFrame(frame,org)
 {
 
 	console.log("laying out composite ",frame);
-	putBox(frame.prompt,org.x,org.y);
+	putBox(frame.prompt,"",org.x,org.y);
 	org.y++;
 	var savedX=org.x;
 	var newRt=org.x;
@@ -108,7 +115,7 @@ function layoutSimpleSlot(part,org)
 {
 	var topLeft={x:org.x,y:org.y};
 	console.log("laying out simple slot ",part);
-	putBox(part.question,org.x,org.y,part);
+	putBox(part.question,"",org.x,org.y,part,0);
 	org.x++;
 	org.y++;
 	drawRect("green", topLeft,org);
@@ -120,23 +127,27 @@ function layoutCheckBoxes(part,org)
 	console.log("laying out checkboxes ",part);
 	for(var i=0;i<part.options.length;i++)
 	{
-		boxLabel=makeCheckboxLabel(part.options[i].choice);
-		putBox(boxLabel,org.x,org.y);
+		boxLabel=makeCheckboxLabelUnchecked();
+		putBox(part.options[i].choice,boxLabel,org.x,org.y,part,i);
 		//putBox(part.options[i].choice,org.x,org.y);
 		org.x++;
 	}
 	org.y++;
 	drawRect("green", topLeft,org); //green
 }
-function makeCheckboxLabel(s)
+function makeCheckboxLabelUnchecked(s)
 {
-	return s+" [ ]";
+	return "[ ]";
+}
+function makeCheckboxLabelChecked(s)
+{
+	return "[x]";
 }
 
 function layoutMore(part,org)
 {
 	console.log("laying out more ",part);
-	putBox(part.question,org.x,org.y)
+	putBox(part.question,"",org.x,org.y,part,0)
 	org.x++;
 	//org.y++;
 	//layoutFrame(part.subframe,org);
@@ -151,9 +162,9 @@ function layoutAlternativesFrame(frame,org)
 	
 	for(var i=0;i<frame.choices.length;i++)
 	{
-		boxLabel=makeRadioLabel(frame.choices[i].question,i,frame.choices.length)
+		boxLabel=makeRadioLabel(i,frame.choices.length)
 		//putBox(frame.choices[i].question,org.x,org.y);
-		putBox(boxLabel,org.x,org.y,frame.choice);
+		putBox(frame.choices[i].question,boxLabel,org.x,org.y,frame,i);
 		org.y++;
 		layoutFrame(frame.choices[i].subframe,org);
 		if (org.x>newRt)
@@ -166,13 +177,13 @@ function layoutAlternativesFrame(frame,org)
 	org.y=newBot;
 	
 }
-function makeRadioLabel(q,i,n)
+function makeRadioLabel(i,n)
 {
 	if (i==0)
-		return "|"+q+"( )";
+		return "|( )";
 	if (i==(n-1))
-		return q+"( )|";
-	return q+"( )";
+		return "( )|";
+	return "( )";
 }
 function layoutLeaf(frame,org)
 {
@@ -183,7 +194,7 @@ function layoutLeaf(frame,org)
 }
 
 
-function putBox(s,i,j,slot)
+function putBox(s,v,i,j,slot,ind)
 {
 	console.log("putting at i j",s,i,j);
 	//if (!isEmpty(i,j))
@@ -191,32 +202,17 @@ function putBox(s,i,j,slot)
 	//	moveBoxRight(i,j);
 	//}
 	boxes[i][j]=s; //text
+	vals[i][j]=v; //value
 	slots[i][j]=slot;
-	drawBox(i,j);
+	index[i][j]=ind;
+	drawBox(v,i,j);
 	makeClickableRect(i,j);
 }
-function isEmpty(i,j)
+
+function drawBox(v,i,j)
 {
-	if((i<0)||(i>(GridSize-1))||(j<0)||(j>(GridSize-1)))
-		return false;
-	return boxes[i][j]=="";
-}
-function moveBoxRight(i,j)
-{
-	if((i<0)||(i>(GridSize-1))||(j<0)||(j>(GridSize-1)))
-	{
-		console.log("out of space in grid");
-		return;
-	}
-	//erase i j
-	console.log("erasing ",i,j);
-	document.getElementById(i+":"+j).remove();
-	putBox(boxes[i][j],i+1,j);
-}
-function drawBox(i,j)
-{
-	putText(boxes[i][j],i*BOXWIDTH+2,j*BOXHEIGHT+(BOXHEIGHT/2),i,j,"label"); //translate text grid coords to screen coords
-	putText("",i*BOXWIDTH+2,j*BOXHEIGHT+(BOXHEIGHT/2),i,j,"value"); 
+	putText(boxes[i][j],i*BOXWIDTH+2,j*BOXHEIGHT+(BOXHEIGHT/3),i,j,"label"); //translate text grid coords to screen coords
+	putText(v,i*BOXWIDTH+2,j*BOXHEIGHT+(.66*BOXHEIGHT),i,j,"value"); 
 }
 function drawRect(color,upperLeft,lowerRight)
 {
@@ -249,14 +245,7 @@ const SVG_NS = 'http://www.w3.org/2000/svg';
   svg.appendChild(newText);
 }
 
-/* this won't track as SVG is deformed
-function handleClick(e)
-{
-    var i= Math.floor(e.clientX/BOXWIDTH);
-    var j= Math.floor(e.clientY/BOXHEIGHT);
-    console.log("box: ",i,j,e.clientX);
-}
-*/
+
 function clickedOnRect(e)
 {
 	console.log('Rectangle was clicked');
@@ -267,7 +256,193 @@ function clickedOnRect(e)
 	console.log(slots[i][j]);
 	if(slots[i][j].type=="simpleSlot")
 		processSimpleSlotPar(i,j,slots[i][j]);
+	else if (slots[i][j].type=="checkboxesSlot")
+		processCheckBoxPar(i,j,slots[i][j]);
+	else if (slots[i][j].type=="alternativesFrame")
+		processRadioPar(i,j,slots[i][j]); 
+	else console.log("bad slot type");
 }
+function processRadioPar(i,j,slot)
+{
+	console.log("radio");
+	var radioVal=toggleRadio(i,j);
+	//rewrite contents
+	writeValue(i,j,radioVal);
+	//process siblings...if turning on, turn sibling off
+	//first to right
+	if(radioIsOn(i,j))
+	{
+		setValueRadio(i,j);
+		turnRadioOffRight(i,j);
+		turnRadioOffLeft(i,j);
+	}
+}
+function toggleRadio(i,j)
+{
+	var now=vals[i][j];
+	if (now=="|( )")
+		return "|(*)";
+	if (now=="( )")
+		return "(*)";
+	if (now=="( )|")
+		return "(*)|";
+	if (now=="|(*)")
+		return "|( )";
+	if (now=="(*)")
+		return "( )";
+	if (now=="(*)|")
+		return "( )|";
+	console.log("bad radio value");
+}
+function radioIsOn(i,j)
+{
+	console.log("in radioIsOn ", i,j);
+	return vals[i][j].includes("*");
+}
+function isRightEnd(i,j)
+{
+	return vals[i][j].includes(")|");
+}
+function turnRadioOffRight(i,j)
+{
+	if(isRightEnd(i,j))
+		return;
+	var ip1=parseInt(i)+1;
+	if(radioIsOn(ip1,j))
+	{
+		writeValue(ip1,j,toggleRadio(ip1,j));
+		return;
+	}
+	turnRadioOffRight(ip1,j);
+}
+function isLeftEnd(i,j)
+{
+	return vals[i][j].includes("|(");
+}
+function turnRadioOffLeft(i,j)
+{
+	if(isLeftEnd(i,j))
+		return;
+	var im1=parseInt(i)-1;
+	if(radioIsOn(im1,j))
+	{
+		writeValue(im1,j,toggleRadio(im1,j));
+		return;
+	}
+	turnRadioOffLeft(im1,j);
+}
+function setValueRadio(i,j)
+{
+	var slot=slots[i][j];
+	slot.choice=slot.choices[index[i][j]].subframe;
+	console.log("choice:",slot.choice);
+}
+/*
+function closeAltRadio(subframe)
+{
+	var modal = document.getElementById("myModal");
+  modal.style.display = "none";
+  //read the checked value
+  subframe.choice=subframe.choices[document.getElementById("foo")["alt"].value].subframe;
+  
+  	
+  	setTimeout(function(){ askQuestionsTop(); }, 10);
+}*/
+function processCheckBoxPar(i,j,slot)
+{
+	//read contents
+	var checked=stateCheckBox(i,j);
+	var newVal;
+	//determine state; toggle state
+	if (checked)
+		newVal=makeCheckboxLabelUnchecked();
+	else newVal=makeCheckboxLabelChecked();
+	console.log("setting checkbox label to ",newVal);
+	//rewrite contents
+	writeValue(i,j,newVal);
+	processCheckBoxValue(i,j,slot);
+}
+//index[i][j] contains the index within a check box set of the clicked item
+//need to look to left and right to collect the indices of boxes in the same set that are clicked
+//can then get the corresponding options
+function processCheckBoxValue(i,j,slot)
+{
+	var array = []
+	//var checkboxes = document.querySelectorAll('input[type=checkbox]:checked');
+	var checkboxInds=getCheckBoxInds(i,j,slot);
+	console.log("checkboxInds[0]",checkboxInds[0]);
+	var s="";
+
+	for (var i = 0; i < checkboxInds.length; i++) 
+	{
+		console.log("ith item ",checkboxInds[i]);
+		var option=slot.options[checkboxInds[i]];
+		console.log("corresponding option ",option);
+		if (option.type=="simple")
+		{
+  			array.push(option.choice);
+  			s=s+","+option.choice;
+  		}
+  		else if(option.type=="multiple")
+  		{
+  			for(var i=0;i<option.values.length;i++)
+  			{
+  				array.push(option.values[i]);
+  				s=s+","+option.values[i];
+  			}
+  		}
+  		else console.log("bad option in checkboxesSlot");
+  	}
+  	
+  	slot.value=array;
+  	console.log("check box value: ",slot.value);
+}
+function getCheckBoxInds(i,j,checkboxesSlot)
+{
+	var indexList=[];
+	if (stateCheckBox(i,j))
+		indexList.push(index[i][j]);
+	addBoxesLeft(i,j,indexList);
+	addBoxesRight(i,j,indexList,checkboxesSlot);
+	return indexList;
+}
+function isRightEndCheck(i,j,slot)
+{
+	//return vals[i][j].includes("]|");
+	return (index[i][j]==slot.options.length-1);
+}
+function addBoxesRight(i,j,indexList,slot)
+{
+	if(isRightEndCheck(i,j,slot))
+		return;
+	var ip1=parseInt(i)+1;
+	if(stateCheckBox(ip1,j))
+	{
+		indexList.push(index[ip1][j])
+	}
+	addBoxesRight(ip1,j,indexList,slot);
+}
+function isLeftEndCheck(i,j)
+{
+	//return vals[i][j].includes("|[");
+	return (index[i][j]==0);
+}
+function addBoxesLeft(i,j,indexList)
+{
+	if(isLeftEndCheck(i,j))
+		return;
+	var im1=parseInt(i)-1;
+	if(stateCheckBox(im1,j))
+	{
+		indexList.push(index[im1][j])
+	}
+	addBoxesLeft(im1,j,indexList);
+}
+function stateCheckBox(i,j)
+{
+	return vals[i][j].includes("x");
+}
+
 function getIJfromId(id)
 {
 	var parts=id.split(":");
@@ -313,11 +488,12 @@ function processSimpleSlotPar(i,j,slot)
 }
 function writeValue(i,j,value)
 {
+	vals[i][j]=value;
 	//erase i j
 	console.log("erasing ",i,j);
 	document.getElementById("value"+i+":"+j).remove();
 	//putBox(boxes[i][j],i,j,slots[i][j]);
-	putText(value,i*BOXWIDTH+2,j*BOXHEIGHT+BOXHEIGHT-4,i,j,"value"); 
+	putText(value,i*BOXWIDTH+2,j*BOXHEIGHT+(.66*BOXHEIGHT),i,j,"value"); 
 }
 function makeClickableRect(i,j)
 {

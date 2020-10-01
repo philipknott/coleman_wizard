@@ -44,17 +44,31 @@ body {font-family: Arial, Helvetica, sans-serif;}
 </style>
 </head>
 <body>
-<script src="frames4.js"></script>
+<script src="framesPseudocode.js"></script>
 <script src="gencommand.js"></script>
 <script src="boundcopy.js"></script>
+<script src="layoutQuestions8.js"></script>
 <script language="JavaScript" type="text/javascript">
 <!--
-//fixing multiple responses in checkboxes frame [+]
-//also fix dialog box formatting [+]
-//make dialog box respond to CR
+//this version generates pseudo code from tableau
+//it has no check that tableau is complete
+
+
+
+//replace question asking process with one that lays all
+//questions out on a virtual plane
+//then allows user to answer in any order
+//use some kind of highlighting to indicate what answers are currently needed
+//aim: use same frames data structure for this
 
 var topLevel=[];
 topLevel[0]=topX;
+
+function run()
+{
+	layout(topLevel);
+	//document.getElementById("firstGroup").addEventListener("click", handleClick);
+}
 
 
 function askQuestionsTop()
@@ -429,7 +443,14 @@ function splitClone(slot)
 
 //-->
 </script>
-<input  type="button" value="run" id="start" onclick="askQuestionsTop();">
+<svg height="350" width="900">
+ 
+       <g id="firstGroup">
+
+  </g>
+</svg>
+<input  type="button" value="run" id="start" onclick="run();">
+<input  type="button" value="generate" id="gen" onclick="cloneAndGenerateCommands();">
 <div id="output">
 	</div>
 <!-- The Modal -->
