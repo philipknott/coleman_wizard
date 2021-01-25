@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Coleman</title>
+
+    <!-- bulma -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+</head>
+
+<body>
+    <section class="hero is-light">
+        <div class="hero-body">
+            <div class="container">
+                <h1 class="title">
+                    Coleman Event Creator
+                </h1>
+                <p class="subtitle">
+                    Using Google Calendar API
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <form action="/submit" method="POST">
+                <div class="columns">
+                    <div class="column">
+                        <div class="field">
+                            <label class="label">Event Title</label>
+                            <div class="control">
+                                <input class="input" type="text" name="summary">
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label class="label">Description</label>
+                            <div class="control">
+                                <textarea class="textarea" name="description" style="resize: none;"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="field">
+                            <label class="label">Date</label>
+                            <div class="control">
+                                <input class="input" type="date" name="date">
+                            </div>
+                        </div>
+                        <div class="columns">
+                            <div class="column">
+                                <div class="field">
+                                    <label class="label">Start</label>
+                                    <div class="control">
+                                        <input class="input" type="time" name="start">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="column">
+                                <div class="field">
+                                    <label class="label">End</label>
+                                    <div class="control">
+                                        <input class="input" type="time" name="end">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label class="label">Repeat?</label>
+                            <label class="radio">
+                                <input type="radio">
+                                Yes
+                            </label>
+                            <label class="radio">
+                                <input type="radio">
+                                No
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <button class="button is-primary" type="submit">Create Event</button>
+            </form>
+        </div>
+    </section>
+</body>
+
+</html>

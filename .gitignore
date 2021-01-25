@@ -1,0 +1,7 @@
+# security
+credentials.json
+token.json
+ids.json
+
+# unnecessary
+node_modules
