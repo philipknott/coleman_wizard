@@ -13,7 +13,7 @@ const TOKEN_PATH = 'token.json';
 fs.readFile('credentials.json', (err, content) => {
     if (err) return console.log('Error loading client secret file:', err);
     // Authorize a client with credentials, then call the Google Calendar API.
-    authorize(JSON.parse(content), listEvents);
+    authorize(JSON.parse(content), getCalendarId);
 });
 
 /**
@@ -67,30 +67,23 @@ function getAccessToken(oAuth2Client, callback) {
 }
 
 /**
- * Lists the next 10 events on the user's primary calendar.
+ * Get the Calendar ID of the 'Coleman' calendar and store it in a local file.
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
-function listEvents(auth) {
+function getCalendarId(auth) {
     const calendar = google.calendar({ version: 'v3', auth });
 
-    var event = {
-        summary: 'Created by API',
-        description: 'This event was created by an APi. If you are reading this, yay!',
-        start: {
-            dateTime: '2021-01-25T02:00:00',
-            timeZone: 'America/Denver'
-        },
-        end: {
-            dateTime: '2021-01-25T03:00:00',
-            timeZone: 'America/Denver'
-        }
-    }
+    calendar.calendarList.list({
+        hidden: false
+    }, (err, res) => {
+        if (err) return console.log('Error:', err)
+        let calendarId = res.data.items.find(e => {
+            return e.summary == 'Coleman'
+        }).id
 
-    calendar.events.insert({
-        calendarId: '###',
-        resource: event
-    }, (err, event) => {
-        if (err) console.log(err)
-        else console.log('event created!')
+        fs.writeFile('calendarId.json', JSON.stringify(calendarId), (err) => {
+            if (err) console.error(err)
+            console.log('Calendar ID stored to calendarId.json')
+        })
     })
 }

@@ -1,7 +1,10 @@
 # Security (important!!!)
 credentials.json
 token.json
-ids.json
+calendarId.json
+
+# Debug
+test.js
 
 # Logs
 logs
