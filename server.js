@@ -8,7 +8,8 @@ const { google } = require('googleapis');
 const SCOPES = ['https://www.googleapis.com/auth/calendar'];
 const TOKEN_PATH = 'token.json';
 
-const calendarId = require('./calendarId.json')
+const calendarId = require('./calendarId.json');
+const { json } = require('body-parser');
 
 var app = express()
 
@@ -19,6 +20,7 @@ app.use(bodyparser.json())
 app.listen(3000, () => { console.log('listening on 3000') })
 
 app.get('/', (req, res) => {
+    // Render HTML file
     res.sendFile(__dirname + '/views/index.html')
 })
 
@@ -55,12 +57,30 @@ app.get('/clear-all-events', (req, res) => {
 function addEvent(auth, event) {
     const calendar = google.calendar({ version: 'v3', auth });
 
+    // Add event to calendar
     calendar.events.insert({
         calendarId,
         resource: event
     }, (err, event) => {
-        if (err) console.log(err)
+        if (err) console.error(err)
         else console.log('event created!')
+    })
+
+    // Add event to events.json 
+    let prettyEvent = {
+        command: event.summary,
+        time: event.start.dateTime.split('T')[1],
+        day: new Date(event.start.dateTime).getDay(),
+        created: Date()
+    }
+
+    fs.readFile('events.json', (err, data) => {
+        if (err) return console.error(err)
+        data = JSON.parse(data)
+        data.push(prettyEvent)
+        fs.writeFile('events.json', JSON.stringify(data), (err) => {
+            if (err) return console.error(err)
+        })
     })
 }
 
@@ -71,17 +91,23 @@ function clearAllEvents(auth) {
     calendar.events.list({
         calendarId
     }, (err, res) => {
-        if (err) console.log(err)
+        if (err) return console.error(err)
+
         // Delete each event 
         res.data.items.forEach(e => {
-            console.log(e.summary, e.id)
             calendar.events.delete({
                 calendarId, 
                 eventId: e.id
             }, (err, res) => {
-                if (err) console.error(err)
+                if (err) return console.error(err)
                 console.log('Event deleted:', e.summary)
             })
         })
+    })
+
+    // Clear events.json file
+    fs.writeFile('events.json', '[]', (err) => {
+        if (err) return console.error(err)
+        console.log('events.json cleared.')
     })
 } 
