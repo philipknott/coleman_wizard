@@ -10,6 +10,7 @@ const TOKEN_PATH = 'token.json';
 
 const calendarId = require('./calendarId.json');
 const { json } = require('body-parser');
+const { oauth2 } = require('googleapis/build/src/apis/oauth2');
 
 var app = express()
 
@@ -19,11 +20,26 @@ app.use(bodyparser.json())
 
 app.listen(3000, () => { console.log('listening on 3000') })
 
+// Main Route that updates events.json, then displays homepage
 app.get('/', (req, res) => {
+    // Get all events from calendar and update events.json
+    fs.readFile('credentials.json', (err, content) => {
+        let credentials = JSON.parse(content);
+        const { client_secret, client_id, redirect_uris } = credentials.installed;
+        const oAuth2Client = new google.auth.OAuth2(
+            client_id, client_secret, redirect_uris[0]);
+
+        fs.readFile(TOKEN_PATH, (err, token) => {
+            oAuth2Client.setCredentials(JSON.parse(token));
+            addEventsFromCalendar(oAuth2Client);
+        });
+    })
+
     // Render HTML file
     res.sendFile(__dirname + '/views/index.html')
 })
 
+// Route that will authorize and call addEvent() function with given event
 app.post('/add-event', (req, res) => {
     let event = req.body
 
@@ -40,6 +56,7 @@ app.post('/add-event', (req, res) => {
     })
 })
 
+// Route that will authorize and call clearAllEvents() function
 app.get('/clear-all-events', (req, res) => {
     fs.readFile('credentials.json', (err, content) => {
         let credentials = JSON.parse(content);
@@ -54,6 +71,32 @@ app.get('/clear-all-events', (req, res) => {
     })
 })
 
+function addEventsFromCalendar(auth) {
+    const calendar = google.calendar({ version: 'v3', auth });
+
+    // Get all events
+    calendar.events.list({
+        calendarId
+    }, (err, res) => {
+        if (err) return console.error('Error retrieving calendar events:', err)
+        
+        // Add events to events.json in a readable format
+        let events = []
+        res.data.items.forEach(e => {
+            events.push({
+                command: e.summary,
+                time: e.start.dateTime.split('T')[1].split('-')[0],
+                day: new Date(e.start.dateTime).getDay(),
+                created: Date(e.created)
+            })
+        })
+
+        fs.writeFile('events.json', JSON.stringify(events), (err) => {
+            if (err) return console.error('Erorr writing to events.json:', err)
+        })
+    })
+}
+
 function addEvent(auth, event) {
     const calendar = google.calendar({ version: 'v3', auth });
 
@@ -61,26 +104,12 @@ function addEvent(auth, event) {
     calendar.events.insert({
         calendarId,
         resource: event
-    }, (err, event) => {
-        if (err) console.error(err)
-        else console.log('event created!')
-    })
-
-    // Add event to events.json 
-    let prettyEvent = {
-        command: event.summary,
-        time: event.start.dateTime.split('T')[1],
-        day: new Date(event.start.dateTime).getDay(),
-        created: Date()
-    }
-
-    fs.readFile('events.json', (err, data) => {
+    }, (err) => {
         if (err) return console.error(err)
-        data = JSON.parse(data)
-        data.push(prettyEvent)
-        fs.writeFile('events.json', JSON.stringify(data), (err) => {
-            if (err) return console.error(err)
-        })
+        console.log('Event created:', event)
+
+        // Update events.json 
+        addEventsFromCalendar(auth)
     })
 }
 
@@ -96,7 +125,7 @@ function clearAllEvents(auth) {
         // Delete each event 
         res.data.items.forEach(e => {
             calendar.events.delete({
-                calendarId, 
+                calendarId,
                 eventId: e.id
             }, (err, res) => {
                 if (err) return console.error(err)
@@ -108,6 +137,5 @@ function clearAllEvents(auth) {
     // Clear events.json file
     fs.writeFile('events.json', '[]', (err) => {
         if (err) return console.error(err)
-        console.log('events.json cleared.')
     })
 } 
