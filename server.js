@@ -1,5 +1,6 @@
 const express = require('express')
 const bodyparser = require('body-parser')
+const ejs = require('ejs')
 
 /* API stuff */
 const fs = require('fs');
@@ -13,6 +14,8 @@ const { json } = require('body-parser');
 const { oauth2 } = require('googleapis/build/src/apis/oauth2');
 
 var app = express()
+
+app.set('view engine', 'ejs')
 
 app.use(express.static('public'))
 app.use(express.urlencoded({ extended: true }))
@@ -35,8 +38,22 @@ app.get('/', (req, res) => {
         });
     })
 
-    // Render HTML file
-    res.sendFile(__dirname + '/views/index.html')
+    // Render homepage
+    fs.readFile('events.json', (err, data) => {
+        if (err) return console.error('Error retrieving events.json:', err)
+        res.render('index.ejs', {
+            events: JSON.parse(data)
+        })
+    })
+})
+
+app.get('/view-events', (req, res) => {
+    fs.readFile('events.json', (err, data) => {
+        if (err) return console.error('Error retrieving events.json:', err)
+        res.render('viewEvents.ejs', {
+            events: JSON.parse(data)
+        })
+    })
 })
 
 // Route that will authorize and call addEvent() function with given event
@@ -52,6 +69,7 @@ app.post('/add-event', (req, res) => {
         fs.readFile(TOKEN_PATH, (err, token) => {
             oAuth2Client.setCredentials(JSON.parse(token));
             addEvent(oAuth2Client, event);
+            res.write('data: refresh')
         });
     })
 })
@@ -79,7 +97,7 @@ function addEventsFromCalendar(auth) {
         calendarId
     }, (err, res) => {
         if (err) return console.error('Error retrieving calendar events:', err)
-        
+
         // Add events to events.json in a readable format
         let events = []
         res.data.items.forEach(e => {

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <%- include('partials/header.ejs') %>
+</head>
+
+<body>
+    <section class="hero is-medium is-light">
+        <div class="hero-body">
+            <div class="container">
+                <div class="content">
+                    <h1 class="title is-size-1 has-text-centered">Coleman Wizard</h1>
+                    <p class="subtitle has-text-centered">Press <strong>Option + Command + i</strong> to open developer
+                        console.</p>
+                    <br>
+                    <div class="columns is-family-monospace has-text-centered">
+                        <div class="column">
+                            <p><strong>createEvent(day, time, command)</strong></p>
+                        </div>
+                        <div class="column">
+                            <p><strong>clearAllEvents()</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <h1 class="title has-text-centered">Events in Coleman Calendar:</h1>
+
+            <% if (events.length == 0) { %>
+                <p class="has-text-centered">Calendar is currently empty.</p>
+            <% } else { %>
+            <% for (e of events) { %>
+                <div class="notification">
+                    <p><strong>Command: </strong>
+                        <%= e.command %>
+                    </p>
+                    <p><strong>Time: </strong>
+                        <%= e.time %>
+                    </p>
+                    <p><strong>Day: </strong>
+                        <%= e.day %>
+                    </p>
+                    <p><strong>Created: </strong>
+                        <%= e.created %>
+                    </p>
+                    <p><strong>JSON: </strong>
+                        <span class="is-family-monospace"><%= JSON.stringify(e) %></span>
+                    </p>
+                </div>
+            <% } %>
+            <% } %>
+        </div>
+    </section>
+
+
+</body>
+
+</html>
