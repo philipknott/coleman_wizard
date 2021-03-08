@@ -69,8 +69,32 @@ app.post('/add-event', (req, res) => {
         fs.readFile(TOKEN_PATH, (err, token) => {
             oAuth2Client.setCredentials(JSON.parse(token));
             addEvent(oAuth2Client, event);
-            res.write('data: refresh')
         });
+    })
+})
+
+// Route that will save POST data to local server file
+app.post('/save', (req, res) => {
+    fs.writeFile('savefile.json', JSON.stringify(req.body), (err) => {
+        if (err) {
+            res.status(500).send('Could not save data.')
+        }
+        else {
+            res.send('Data saved.')
+        }
+    })
+})
+
+// Route that will send data from local server file
+app.get('/load', (req, res) => {
+    fs.readFile('savefile.json', (err, data) => {
+        if (err) {
+            console.error(err)
+            res.status(500).send('Could not load data.')
+        }
+        else {
+            res.json(JSON.parse(data))
+        }
     })
 })
 
@@ -104,8 +128,7 @@ function addEventsFromCalendar(auth) {
             events.push({
                 command: e.summary,
                 time: e.start.dateTime.split('T')[1].split('-')[0],
-                day: new Date(e.start.dateTime).getDay(),
-                created: Date(e.created)
+                day: new Date(e.start.dateTime).getDay()
             })
         })
 
@@ -124,8 +147,6 @@ function addEvent(auth, event) {
         resource: event
     }, (err) => {
         if (err) return console.error(err)
-        console.log('Event created:', event)
-
         // Update events.json 
         addEventsFromCalendar(auth)
     })
@@ -156,4 +177,10 @@ function clearAllEvents(auth) {
     fs.writeFile('events.json', '[]', (err) => {
         if (err) return console.error(err)
     })
-} 
+}
+
+function save(data) {
+    fs.writeFile('savefile.json', JSON.stringify(data), (err) => {
+        if (err) return console.error('Error saving to safefile:', err)
+    })
+}
