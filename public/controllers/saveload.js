@@ -2,7 +2,7 @@
  * Saves a given javascript object to server in JSON format.
  * @param {object} data A javascript object to be stored on the server.
  */
-async function save(data) {
+async function saveData(data) {
 
     // Make POST request with data to server
     const response = await fetch('/save', {
@@ -27,7 +27,7 @@ async function save(data) {
  * Retrieves saved JSON data from server and passes it to given callback function.
  * @param {function} callback Function to be called with stored data.
  */
-async function load(callback) {
+async function loadData(callback) {
 
     // Make GET request to server
     const response = await fetch('/load')

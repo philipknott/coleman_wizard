@@ -1,0 +1,99 @@
+<html>
+
+<head>
+	<title>Automation Wizard</title>
+
+	<!-- Styles -->
+	<link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+	<!-- Wizard code (Clayton Lewis) -->
+	<script src="controllers/interpretCommandsFeb0.js"></script>
+	<script src="controllers/framesFeb0.js"></script>
+	<script src="controllers/gencommandFeb0.js"></script>
+	<script src="controllers/boundcopyFeb0.js"></script>
+	<script src="controllers/layoutQuestionsFeb0.js"></script>
+
+	<!-- Server/API code (Philip Knott) -->
+	<script src="controllers/createEvent.js"></script>
+	<script src="controllers/clearAllEvents.js"></script>
+	<script src="controllers/saveload.js"></script>
+
+	<script language="JavaScript" type="text/javascript">
+		//this version generates pseudo code from tableau
+		//it has no check that tableau is complete
+
+		//replace question asking process with one that lays all
+		//questions out on a virtual plane
+		//then allows user to answer in any order
+		//use some kind of highlighting to indicate what answers are currently needed
+		//aim: use same frames data structure for this
+
+		var topLevel = [];
+		topLevel[0] = topX;
+
+		function run() {
+			//dummy();
+			layout(topLevel);
+			//document.getElementById("firstGroup").addEventListener("click", handleClick);
+			//dummy();
+		}
+
+		function askQuestionsTop() {
+			//alert("at top level");
+			console.log("name ", topLevel[0].name);
+			console.log("name ", top.name);
+			for (var i = 0; i < topLevel.length; i++)
+				if (!topLevel[i].finished) {
+					askQuestions(topLevel[i]);
+					return;
+				}
+			cloneAndGenerateCommands();
+		}
+		function cloneAndGenerateCommands() {
+			//stub
+			console.log("preparing to generate commands");
+			displayColor(0, topLevel);
+			displayColor(1, topLevel);
+			//return;
+			//bindTopLevel() then
+			//bindTopLevel();
+			//traverseBoundVersions() then
+			traverseTop();
+			//generateCommandsTopLevel()
+			generateCommandsTopLevel();
+
+
+			//stub for test
+			//document.getElementById("output").innerHTML+=generateCommands(topLevel[0].name);
+		}
+
+	</script>
+
+	<input type="button" value="run" id="start" onclick="run();">
+	<input type="button" value="generate" id="gen" onclick="cloneAndGenerateCommands();">
+	<svg height="1000" width="900">
+
+		<g id="firstGroup">
+
+		</g>
+	</svg>
+
+	<div id="output">
+	</div>
+	<!-- The Modal -->
+	<div id="myModal" class="modal">
+
+		<!-- Modal content -->
+		<div class="modal-content">
+
+			<div id="innerModal"></div>
+			<input type="button" value="OK" id="close">
+		</div>
+
+	</div>
+
+</body>
+
+</html>

@@ -1,3 +1,7 @@
+/* This file's main purpose is to authenticate the server to control
+the user's calendar events. Simply run 'node index.js' and follow
+instructions to get your account set up. */
+
 const fs = require('fs');
 const readline = require('readline');
 const { google } = require('googleapis');
