@@ -65,7 +65,12 @@ app.post('/add-event', (req, res) => {
 
 /* Route that will save POST data to local server file */
 app.post('/save', (req, res) => {
-    fs.writeFile('savefile.json', JSON.stringify(req.body), (err) => {
+    let savedata = JSON.parse(fs.readFileSync('savefile.json', 'utf-8'))
+    let savename = Object.keys(req.body)[0]
+    let data = req.body[savename]
+    savedata[savename] = data
+
+    fs.writeFile('savefile.json', JSON.stringify(savedata), (err) => {
         if (err) {
             res.status(500).send('Could not save data.')
         }
@@ -88,6 +93,18 @@ app.get('/load', (req, res) => {
     })
 })
 
+/* Route that will remove all data from savefile.json */
+app.get('/reset-savefile', (req, res) => {
+    fs.writeFile('savefile.json', '{}', (err) => {
+        if (err) {
+            res.status(500).send('Could not reset savefile.')
+        }
+        else {
+            res.send('Savefile reset.')
+        }
+    })
+})
+
 /* Route that will authorize and call clearAllEvents() function */
 app.get('/clear-all-events', (req, res) => {
     fs.readFile('credentials.json', (err, content) => {
@@ -102,32 +119,6 @@ app.get('/clear-all-events', (req, res) => {
         });
     })
 })
-
-/* Adds all Google Calendar events to a server JSON file */
-// function addEventsFromCalendar(auth) {
-//     const calendar = google.calendar({ version: 'v3', auth });
-
-//     // Get all events
-//     calendar.events.list({
-//         calendarId
-//     }, (err, res) => {
-//         if (err) return console.error('Error retrieving calendar events:', err)
-
-//         // Add events to events.json in a readable format
-//         let events = []
-//         res.data.items.forEach(e => {
-//             events.push({
-//                 command: e.summary,
-//                 time: e.start.dateTime.split('T')[1].split('-')[0],
-//                 day: new Date(e.start.dateTime).getDay()
-//             })
-//         })
-
-//         fs.writeFile('events.json', JSON.stringify(events), (err) => {
-//             if (err) return console.error('Error writing to events.json:', err)
-//         })
-//     })
-// }
 
 /* Creates an event in Google Calendar */
 function addEvent(auth, event) {

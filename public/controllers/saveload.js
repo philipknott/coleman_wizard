@@ -27,7 +27,7 @@ async function saveData(data) {
  * Retrieves saved JSON data from server and passes it to given callback function.
  * @param {function} callback Function to be called with stored data.
  */
-async function loadData(callback) {
+async function loadData(callback, name = undefined) {
 
     // Make GET request to server
     const response = await fetch('/load')
@@ -41,7 +41,29 @@ async function loadData(callback) {
 
     // Call callback function with JSON result
     const data = await response.json()
-    callback(data)
+
+    if (name) {
+        callback(data[name])
+    }
+    else {
+        callback(data)
+    }
+}
+
+/**
+ * Sends request to server to reset the server save file.
+ */
+async function resetSaveData() {
+    const response = await fetch('/reset-savefile')
+
+    if (!response.ok) {
+        const err = await response.text()
+        console.log('Error:', err)
+        return
+    }
+
+    const text = await response.text()
+    console.log(text)
 }
 
 /**

@@ -89,7 +89,7 @@
                     </label>
                 </div>
             </div>
-            
+
             <div class="field">
                 <div class="columns">
                     <div class="column">
@@ -100,8 +100,8 @@
                     </div>
                     <div class="column">
                         <div class="buttons">
-                            <button class="button" onclick="save()">Save</button>
-                            <button class="button" onclick="loadData(load)">Load</button>
+                            <button class="button" onclick="enableSaveModal()">Save</button>
+                            <button class="button" onclick="enableLoadModal()">Load</button>
                             <button class="button" onclick="clearInputs()">Clear</button>
                         </div>
                     </div>
@@ -109,6 +109,45 @@
             </div>
         </div>
     </section>
+
+    <!-- SAVE MODAL -->
+    <div class="modal" id="save-modal">
+        <div class="modal-background"></div>
+        <div class="modal-content">
+            <div class="notification">
+                <div class="field">
+                    <label class="label">Enter save name</label>
+                    <div class="control">
+                        <input class="input" type="text" id="savename">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <button class="button is-success" onclick="save()">Save</button>
+                    <button class="button" onclick="disableSaveModal()">Cancel</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- LOAD MODAL -->
+    <div class="modal" id="load-modal">
+        <div class="modal-background"></div>
+        <div class="modal-content">
+            <div class="notification">
+                <div class="field">
+                    <p class="title">Choose load name</p>
+                    <div class="buttons" id="load-options">
+                    </div>
+                </div>
+                <div class="buttons">
+                    <button class="button is-danger" onclick="reset()">Delete All</button>
+                    <button class="button" onclick="disableLoadModal()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         const WEEKDAYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
@@ -138,7 +177,7 @@
         }
 
         /**
-         * Function to save inputs to server file
+         * Function to save inputs to server save file
          */
         function save() {
             const data = {
@@ -147,11 +186,17 @@
                 command: COMMANDS.find(e => document.getElementById(e).checked),
                 days: WEEKDAYS.filter(e => document.getElementById(e).checked)
             }
-            saveData(data)
+            // saveData(data)
+            savename = document.getElementById('savename').value
+            // saveData(savename, data)
+            saveData({ [savename]: data })
+
+            disableSaveModal()
         }
 
         /**
-         * Function to load input data from server file
+         * Function to load input data from server save file. Pass as callback 
+         *  to loadData()
          */
         function load(data) {
             document.getElementById('hour').value = data.hour
@@ -160,10 +205,30 @@
             WEEKDAYS.forEach(day => {
                 document.getElementById(day).checked = data.days.includes(day)
             })
+            disableLoadModal()
         }
 
         /**
-         * Function to clear all inputs
+         * Function to reset server save file
+         */
+        function reset() {
+            resetSaveData()
+            disableLoadModal()
+        }
+
+        /**
+         * Function that fills in buttons in load modal
+         */
+        function fillLoadOptions(data) {
+            let names = Object.keys(data)
+            names.forEach(name => {
+                document.getElementById('load-options').innerHTML += `<button class="button is-primary" onclick="loadData(load, '${name}')">${name}</button>`
+            })
+        }
+
+        /**
+         * Function to clear all user input fields
+         *  (this function is specific to my sample.html file & IDs)
          */
         function clearInputs() {
             document.getElementById('hour').value = ''
@@ -174,6 +239,25 @@
             WEEKDAYS.forEach(day => {
                 document.getElementById(day).checked = false
             })
+        }
+
+        function enableSaveModal() {
+            document.getElementById('save-modal').className = 'modal is-active'
+        }
+
+        function disableSaveModal() {
+            document.getElementById('savename').value = ''
+            document.getElementById('save-modal').className = 'modal'
+        }
+
+        function enableLoadModal() {
+            loadData(fillLoadOptions)
+            document.getElementById('load-modal').className = 'modal is-active'
+        }
+
+        function disableLoadModal() {
+            document.getElementById('load-options').innerHTML = ''
+            document.getElementById('load-modal').className = 'modal'
         }
     </script>
 </body>
