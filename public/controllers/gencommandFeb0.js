@@ -1,19 +1,26 @@
-console.log("about to define generateCommandsTopLevel");
-
 function generateCommandsTopLevel()
 {
+	var commands="";
 	for(i=0;i<topLevel.length;i++)
 	{
-		console.log("bound version :",topLevel[i]);
-		document.getElementById("output").innerHTML+=generateCommands(topLevel[i]);
+		console.log("topLevel entry :",topLevel[i]);
+		var commandSegment=generateCommands(topLevel[i]);
+		//document.getElementById("output").innerHTML+=generateCommands(topLevel[i]);
+		document.getElementById("output").innerHTML+=replaceBreaks(commandSegment);
+		commands+=commandSegment;
 	}
+	interpretCommands(commands);
+
 }
-
-
 
 function generateCommands(frame)
 {
-	console.log("generating commands for ",frame.name);
+	console.log("generating commands for ",frame);
+	if(frame=="")
+	{
+		console.log("trying to generate commands for null frame");
+		return "nil";
+	}
 	//var frame=frames.get(frameName);
 	var s=scripts.get(frame.name); //name of frame is name of script
 	var splits=s.split("^");
@@ -22,7 +29,7 @@ function generateCommands(frame)
 	{
 		result += processSplit(frame,splits[i])
 	}
-	result=replaceBreaks(result);
+	//result=replaceBreaks(result);
 	//document.getElementById("output").innerHTML+=result;
 	return result;
 }

@@ -84,12 +84,26 @@ function checkboxesSlotBind(part)
 function traverseTop()
 {
 	for(var i=0;i<topLevel.length;i++)
+	{
+		console.log("************************ traversing i:",i);
 		traverse(topLevel[i],i);
+		displayColor(i,topLevel); //debug only
+		console.log("************************ finished traversing i topLevel.length ",i, topLevel.length);
+	}
+}
+function displayColor(index,frameArray)
+{
+	//console.log("===================== index, color:",index,frameArray[index].parts[3].subframe.choice.choice.choice.name);
 }
 
 function traverse(frame,index) //index keeps track of what top level frame is being processed
 {
 	console.log("traverse ",frame," index ", index);
+	if (frame=="")
+	{
+		console.log("no choice filled in");
+		return;
+	}
 	if(frame.type=="compositeFrame")
 	{
 		traverseCompositeFrame(frame,index);
@@ -146,7 +160,7 @@ function traverseCheckboxesSlot(part,index)
 	console.log("num of savedValues ",savedValues.length);
 	for(var i=0;i<savedValues.length-1;i++)
 	{
-		console.log("one pass thru cloning for index ",index);
+		console.log("one pass thru splitting for index ",index);
 		part.value=[];
 		part.value[0]=savedValues[i];
 		addCopyFrameToTopLevel(index);
@@ -158,17 +172,20 @@ function traverseCheckboxesSlot(part,index)
 
 function addCopyFrameToTopLevel(index)
 {
-	console.log("adding clone at topLevel");
-	topLevel[topLevel.length]=clone(topLevel[index]);
+	console.log("adding clone at topLevel"); //need to insert after current one, not at end?
+	topLevel[topLevel.length]=clone(topLevel[index]); 
+	console.log("after addCopyFrameToTopLevel, index and topLevel: ",index,topLevel);
+	console.log("in addCopyFrameToTopLevel");
+	displayColor(topLevel.length-1,topLevel);
 }
 
 
 
 
-//how to clone a frame (fully bound; single values for checkboxes)
+//how to clone a frame (fully bound)
 function clone(frame)
 {
-	//var frameCopy={name:frame.name, type:frame.type};
+	console.log("start cloning frame ",frame);
 	if(frame.type=="compositeFrame")
 		return cloneCompositeFrame(frame);
 	if(frame.type=="alternativesFrame")
@@ -184,14 +201,32 @@ function cloneLeaf(frame)
 }
 function cloneAlternativesFrame(frame)
 {
+	console.log("in cloneAlternativesFrame, frame: ",frame);
+	if(frame.name=="color")
+		console.log("---------------------in cloneAlternativesFrame color is ",frame.choice.name);
 	var frameCopy={name:frame.name, type:frame.type};
 	frameCopy.finished=frame.finished;
-	if (frame.choice!="")
-		frameCopy.choice=clone(frame.choice);
 	frameCopy.choices=[];
 	for(var i=0;i<frame.choices.length;i++)
-		frameCopy.choices[i]=frame.choices[i];
+		frameCopy.choices[i]={question:frame.choices[i].question,subframe:clone(frame.choices[i].subframe)};
+	if (frame.choice!="")
+	{
+		//frameCopy.choice=frame.choice;//removing clone here did not help... but try again
+		frameCopy.choice=frameCopy.choices[findChoiceIndex(frame)].subframe;
+	}
+	else frameCopy.choice="";
+	console.log("++++++++++++++++++choice is ",frameCopy.choice);
+
 	return frameCopy;
+}
+function findChoiceIndex(frame)
+{
+	for(var i=0;i<frame.choices.length;i++)
+		if(frame.choice.name==frame.choices[i].subframe.name)
+			return i;
+	console.log("bad choice in cloning alternativesFrame");
+	return -1;
+
 }
 function cloneCompositeFrame(frame)
 {
@@ -221,12 +256,20 @@ function cloneMore(part)
 }
 function cloneSubFrame(part)
 {
-	return {type:"subFrame",name:part.name,subframe:clone(part.subframe)};
+	return {type:"subFrame",subframe:clone(part.subframe)};
 }
 function simpleSlotClone(part)
 {
+	console.log("in simpleSlotClone part: ",part);
 	return {type:"simpleSlot",name:part.name,question:part.question,value:part.value};
 }
+
+function checkboxesSlotClone(part)
+{
+	console.log("in checkboxesSlotClone; part: ",part);
+	return {type:"checkboxesSlot", name:part.name,options:part.options,cloneQuestion:part.cloneQuestion,value:part.value};
+}
+/*
 function checkboxesSlotClone(part)
 {
 	var newPart={type:"checkboxesSlot",name:part.name,options:part.options,cloneQuestion:part.cloneQuestion};
@@ -238,7 +281,11 @@ function checkboxesSlotClone(part)
 	}
 	console.log("bad checkboxes ");
 	return {};
+
 }
+*/
+
+/* think don't need the following
 //make blank clone
 function blankClone(frame)
 {
@@ -259,7 +306,7 @@ function blankCloneLeaf(frame)
 }
 function blankCloneAlternativesFrame(frame)
 {
-	console.log("staring blackclonealternativesframe for ",frame);
+	console.log("starting blankclonealternativesframe for ",frame);
 	var frameCopy={name:frame.name, type:frame.type};
 	frameCopy.finished=false;
 	frameCopy.choice="";
@@ -285,7 +332,7 @@ function blankCloneCompositeFrame(frame)
 function blankClonePart(part)
 {
 	if(part.type=="simpleSlot")
-		return blanlSimpleSlotClone(part);
+		return blankSimpleSlotClone(part);
 	if(part.type=="checkboxesSlot")
 		return blankCheckboxesSlotClone(part);
 	if (part.type=="subFrame")
@@ -309,7 +356,7 @@ function blankCheckboxesSlotClone(part)
 {
 	return {type:"checkboxesSlot",name:part.name,options:part.options,value:[],cloneQuestion:part.cloneQuestion};
 }
-
+*/
 
 	
 

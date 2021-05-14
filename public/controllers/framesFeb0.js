@@ -1,8 +1,6 @@
 //this version adds "more" blocks for in-question cloning
 //extending spoken message stub
 
-// random comment
-
 var redSubframe=
 {
 	name:"red",
@@ -43,7 +41,7 @@ var spokenSubframe=
 	{
 		type:"simpleSlot",
 		name: "message",
-		question: "",
+		question: "Text",
 		value:""
 	}
 	]
@@ -141,6 +139,7 @@ var top2=
 	type:"leaf"
 };
 */
+
 var topX=
 {
 	name:"top",
@@ -166,7 +165,9 @@ var topX=
 		options: [{type:"simple",choice:"Su"},{type:"simple",choice:"Mo"},
 		{type:"simple",choice:"Tu"},{type:"simple",choice:"We"},
 		{type:"simple",choice:"Th"},{type:"simple",choice:"Fr"},
-		{type:"simple",choice:"Sa"},{type:"multiple",choice:"weekdays",values:["Mo","Tu","We","Th","Fr"]}
+		{type:"simple",choice:"Sa"}
+		//{type:"simple",choice:"Sa"},{type:"multiple",choice:"weekdays",values:["Mo","Tu","We","Th","Fr"]} //suppressing
+		//multiple velues option for to avoid complexities with overlapping values, and rendering values
 		],
 		cloneQuestion:"Same thing every day?",
 		value:[]
@@ -177,7 +178,7 @@ var topX=
 	},
 	{
 		type:"more",
-		question:"another action?",
+		question:"click to schedule something else",
 		subframe:actionFrame,
 		finished:false
 	}
@@ -190,61 +191,48 @@ console.log("top name is ",topX.name);
 
 
 
-//use markdown philosophy for scripts: plan text escaping with ^ 
+//use markdown philosophy for scripts: plain text escaping with ^ 
 var scripts=new Map();
 scripts.set("top",
-`select +       
-enter routine name
-select next
-select + next to when this happens
-select schedule
-select at time
-set ^slotval hour^ on dial
-set ^slotval minute^ on dial
-select ok
-select repeat
-select ^slotval days^
-select next
-select add action
+`
+hour ^slotval hour^ 
+minute ^slotval minute^ 
+day ^slotval days^
 ^parts^
-select save
-select next
-select save
 `);
 scripts.set("action","^chosen action^");
 scripts.set("lamp",
-`select lights 
+	'^chosen lamp^');
+/*
+scripts.set("lamp",
+`
 select color lamp
-select next
 ^chosen lamp^
 `);
+*/
 scripts.set("color",
-`select set color
-select color
-
-^chosen color^
+`^chosen color^
 `);
 scripts.set("on-off",
-`select power
-
+`
 ^chosen on-off^
 `);
 scripts.set("turnOn",
-	`select next`);
+	`command nil`); //interpreter should ignore this
+//scripts.set("turnOn",
+//	`on`);
 scripts.set("turnOff",
-	`swipe button
-	select next`);
+	`command off`);
 scripts.set("red",
-	`action to select red`);
+	`command red`);
 scripts.set("blue",
-	`actions to select blue`);
+	`command blue`);
 scripts.set("yellow",
-	`action to select yellow`);
+	`command yellow`);
 scripts.set("green",
-	`actions to select green`);
+	`command green`);
 scripts.set("spoken",
-	`action for spoken prompt
-	^slotval message^
+	`speak ^slotval message^
 	`);
 
 
